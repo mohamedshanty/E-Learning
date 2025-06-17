@@ -19,6 +19,7 @@ import hero from "./hero.jpg";
 import hero1 from "./hero1.png";
 import about from "./about.png";
 import contact from "./contact.png";
+import contact1 from "./contact1.png";
 
 const assets = {
   avatar_icon,
@@ -42,6 +43,7 @@ const assets = {
   hero1,
   about,
   contact,
+  contact1,
 };
 
 export default assets;

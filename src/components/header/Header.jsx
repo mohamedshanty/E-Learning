@@ -87,7 +87,7 @@ const Header = () => {
           <Toolbar sx={{ justifyContent: "space-between" }}>
             {/* Logo */}
             <Typography
-              variant="h6"
+              variant="h5"
               sx={{ fontWeight: "bold", color: "#00ADB5", cursor: "pointer" }}
               onClick={() => {
                 if (location.pathname === "/home") {

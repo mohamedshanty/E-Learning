@@ -1,5 +1,5 @@
 import React, { createContext, useEffect, useState } from "react";
-import { coursesArr } from "../courses";
+import { coursesArr } from "../data/courses";
 
 export const CoursesContext = createContext();
 const LOCAL_STORAGE_KEY = "course-progress-data";

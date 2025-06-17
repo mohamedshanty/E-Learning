@@ -13,7 +13,6 @@ import {
   CardActions,
 } from "@mui/material";
 import { Link } from "react-router-dom";
-import { blogsData } from "../../blogsData";
 import Header from "../../components/header/Header";
 import { useContext } from "react";
 import { BlogContext } from "../../context/BlogContext";
@@ -120,10 +119,13 @@ const BlogDetails = () => {
                     <Typography variant="subtitle1" gutterBottom>
                       {item.title}
                     </Typography>
-                    <Typography variant="body2" color="gray">
+                    <Typography variant="body2" gutterBottom color="gray">
                       {item.date}
                     </Typography>
-                    <CardActions sx={{ px: 2, pb: 2 }}>
+                    <Typography variant="body2" paragraph color="white">
+                      {item.summary}
+                    </Typography>
+                    <CardActions sx={{ p: 0, pt: 1 }}>
                       <CustomButton
                         variant="outlined"
                         to={`/blog/${item.id}`}

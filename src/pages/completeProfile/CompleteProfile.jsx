@@ -15,10 +15,10 @@ import {
   Autocomplete,
   Chip,
 } from "@mui/material";
-import CustomTextField from "../../components/customTextField/CustomTextField";
 import { useNavigate } from "react-router-dom";
 // import { LoadingButton } from "@mui/lab";
 import assets from "../../assets/assets";
+import CustomTextField from "../../components/CustomTextField/CustomTextField";
 
 const options = [
   "React",

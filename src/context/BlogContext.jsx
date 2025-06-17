@@ -1,5 +1,5 @@
 import React, { createContext, useState, useEffect, useRef } from "react";
-import { blogsData } from "../blogsData";
+import { blogsData } from "../data/blogsData";
 
 export const BlogContext = createContext();
 

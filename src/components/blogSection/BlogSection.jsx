@@ -9,8 +9,7 @@ import {
   CardActions,
   Button,
 } from "@mui/material";
-import { blogsData } from "../../blogsData";
-import { Link } from "react-router-dom";
+import { blogsData } from "../../data/blogsData";
 import CustomButton from "../CustomButton/CustomButton";
 
 const BlogSection = () => {
@@ -64,7 +63,7 @@ const BlogSection = () => {
                     {post.summary}
                   </Typography>
                 </CardContent>
-                <CardActions sx={{ px: 2, pb: 2 }}>
+                <CardActions sx={{ p: 2 }}>
                   <CustomButton
                     variant="outlined"
                     to={`/blog/${post.id}`}

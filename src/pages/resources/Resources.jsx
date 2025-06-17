@@ -17,7 +17,7 @@ import {
 import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
 import LinkIcon from "@mui/icons-material/Link";
 import PlayCircleFilledIcon from "@mui/icons-material/PlayCircleFilled";
-import { resourcesData } from "../../resourcesData";
+import { resourcesData } from "../../data/resourcesData";
 import Header from "../../components/header/Header";
 
 import OndemandVideoIcon from "@mui/icons-material/OndemandVideo";
@@ -62,7 +62,7 @@ const Resources = () => {
         }}
       >
         <Container maxWidth="lg">
-          <Typography variant="h3" gutterBottom color="white">
+          <Typography variant="h3" gutterBottom sx={{ color: "#00ADB5" }}>
             Useful Resources
           </Typography>
           <Typography variant="body1" color="gray" mb={4}>
@@ -140,10 +140,15 @@ const Resources = () => {
                 count={Math.ceil(filtered.length / itemsPerPage)}
                 page={page}
                 onChange={(e, value) => setPage(value)}
-                color="primary"
                 sx={{
                   color: "white",
                   ".MuiPaginationItem-text": { color: "white" },
+                  ".MuiPaginationItem-page.Mui-selected": {
+                    background: "#00ADB5",
+                  },
+                  ".MuiPaginationItem-page.Mui-selected:hover": {
+                    background: "#00ADB5",
+                  },
                 }}
               />
             </Box>

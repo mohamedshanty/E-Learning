@@ -14,7 +14,7 @@ import {
 import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
 import OndemandVideoIcon from "@mui/icons-material/OndemandVideo";
 import LinkIcon from "@mui/icons-material/Link";
-import { resourcesData } from "../../resourcesData";
+import { resourcesData } from "../../data/resourcesData";
 import CustomButton from "../CustomButton/CustomButton";
 
 const typeIcons = {
@@ -23,10 +23,8 @@ const typeIcons = {
   Link: <LinkIcon />,
 };
 
-const filterOptions = ["All", "PDF", "Video", "Link"];
-
 const ResourcesSection = () => {
-  const [filter, setFilter] = useState("All");
+  const [filter] = useState("All");
 
   const filteredResources =
     filter === "All"
@@ -48,25 +46,6 @@ const ResourcesSection = () => {
         >
           Helpful Resources for Your Studies
         </Typography>
-
-        <Stack direction="row" spacing={2} sx={{ mb: 4 }}>
-          {filterOptions.map((option) => (
-            <Chip
-              key={option}
-              label={option}
-              onClick={() => setFilter(option)}
-              sx={{
-                backgroundColor: filter === option ? "#00ADB5" : "#1e1e1e",
-                color: filter === option ? "#ffffff" : "#aaaaaa",
-                "&:hover": {
-                  backgroundColor: "#00ADB5",
-                  color: "#ffffff",
-                },
-                transition: "all 0.3s ease",
-              }}
-            />
-          ))}
-        </Stack>
 
         <Grid container spacing={4}>
           {filteredResources.slice(0, 3).map((res) => (

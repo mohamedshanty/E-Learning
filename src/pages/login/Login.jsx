@@ -13,9 +13,7 @@ import {
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { Link, useNavigate } from "react-router-dom";
-// import CustomTextField from "../components/CostomTextField";
-import { LoadingButton } from "@mui/lab";
-import CustomTextField from "../../components/customTextField/CustomTextField";
+import CustomTextField from "../../components/CustomTextField/CustomTextField";
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -82,10 +80,6 @@ const Login = () => {
                   fullWidth
                   value={formData.firstName}
                   onChange={handleChange}
-                  // // @ts-ignore
-                  // error={!!errors.firstName}
-                  // // @ts-ignore
-                  // helperText={errors.firstName}
                 />
                 <CustomTextField
                   label="Last Name"
@@ -93,10 +87,6 @@ const Login = () => {
                   fullWidth
                   value={formData.lastName}
                   onChange={handleChange}
-                  // @ts-ignore
-                  // error={!!errors.lastName}
-                  // // @ts-ignore
-                  // helperText={errors.lastName}
                 />
               </Box>
             ) : null}
@@ -107,10 +97,6 @@ const Login = () => {
               fullWidth
               value={formData.email}
               onChange={handleChange}
-              // // @ts-ignore
-              // error={!!errors.email}
-              // // @ts-ignore
-              // helperText={errors.email}
             />
             <CustomTextField
               label="Password"
@@ -119,10 +105,6 @@ const Login = () => {
               fullWidth
               value={formData.password}
               onChange={handleChange}
-              // @ts-ignore
-              // error={!!errors.password}
-              // // @ts-ignore
-              // helperText={errors.password}
               InputProps={{
                 endAdornment: (
                   <InputAdornment position="end">
@@ -146,10 +128,6 @@ const Login = () => {
                 fullWidth
                 value={formData.confirmPassword}
                 onChange={handleChange}
-                // @ts-ignore
-                // error={!!errors.confirmPassword}
-                // // @ts-ignore
-                // helperText={errors.confirmPassword}
                 InputProps={{
                   endAdornment: (
                     <InputAdornment position="end">
@@ -166,18 +144,13 @@ const Login = () => {
               />
             ) : null}
 
-            <LoadingButton
+            <Button
               type="submit"
               fullWidth
               variant="contained"
-              loading={loading}
-              loadingIndicator={
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                  <CircularProgress size={20} sx={{ color: "#ddd" }} />
-                  <Typography sx={{ color: "#ddd", fontSize: 14 }}>
-                    {currState === "Sign Up" ? "Signing Up..." : "Login..."}
-                  </Typography>
-                </Box>
+              disabled={loading}
+              startIcon={
+                loading && <CircularProgress size={20} sx={{ color: "#ddd" }} />
               }
               sx={{
                 backgroundColor: "#203a43",
@@ -187,8 +160,17 @@ const Login = () => {
                 },
               }}
             >
-              {currState === "Sign Up" ? "Sign Up" : "Login"}
-            </LoadingButton>
+              {loading ? (
+                <Typography sx={{ color: "#ddd", fontSize: 14 }}>
+                  {currState === "Sign Up" ? "Sign Up..." : "Login..."}
+                </Typography>
+              ) : currState === "Sign Up" ? (
+                "Sign Up"
+              ) : (
+                "Login"
+              )}
+              {/* {currState === "Sign Up" ? "Sign Up" : "Login"} */}
+            </Button>
 
             {currState === "Sign Up" ? (
               <Typography variant="body2" align="center" sx={{ color: "#ccc" }}>

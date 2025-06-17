@@ -24,7 +24,6 @@ const Courses = () => {
   const { courses } = useContext(CoursesContext);
   const navigate = useNavigate();
 
-  // حساب التقدم بناءً على المحاضرات في كل كورس
   const coursesWithProgress = courses.map((course) => {
     const totalLectures = course.lectures.length;
     const lecturesCompleted = course.lectures.filter(
@@ -46,7 +45,6 @@ const Courses = () => {
     };
   });
 
-  // فلترة الكورسات حسب التبويب
   const filteredCourses = coursesWithProgress.filter((course) => {
     if (tabValue === "all") return true;
     return course.status === tabValue;
@@ -68,12 +66,14 @@ const Courses = () => {
       >
         <Container maxWidth="lg">
           <Typography
-            variant="h4"
-            sx={{ color: "#00ADB5", fontWeight: "bold", mb: 2 }}
+            Typography
+            variant="h3"
+            gutterBottom
+            sx={{ color: "#00ADB5" }}
           >
             My Courses
           </Typography>
-          <Typography variant="body1" sx={{ color: "#cccccc", mb: 4 }}>
+          <Typography variant="body1" color="gray" mb={4}>
             Track your learning progress and access all your registered courses
             in one place.
           </Typography>

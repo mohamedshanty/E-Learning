@@ -20,7 +20,7 @@ const Home = () => {
       if (section) {
         setTimeout(() => {
           section.scrollIntoView({ behavior: "smooth" });
-        }, 100); // تأخير بسيط بعد التنقل
+        }, 100);
       }
     }
   }, [location]);

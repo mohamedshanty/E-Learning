@@ -4,11 +4,12 @@ import { Link } from "react-router-dom";
 
 const CustomButton = ({ to, children, variant = "contained", ...props }) => {
   const isOutlined = variant === "outlined";
+  const isLink = Boolean(to);
 
   return (
     <Button
-      component={Link}
-      to={to}
+      component={isLink ? Link : "button"}
+      to={isLink ? to : undefined}
       {...props}
       variant={variant}
       sx={{
@@ -38,4 +39,5 @@ const CustomButton = ({ to, children, variant = "contained", ...props }) => {
     </Button>
   );
 };
+
 export default CustomButton;

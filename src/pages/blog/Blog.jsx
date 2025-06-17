@@ -12,7 +12,7 @@ import {
   CardActions,
 } from "@mui/material";
 import Header from "../../components/header/Header";
-import { blogsData } from "../../blogsData";
+import { blogsData } from "../../data/blogsData";
 import CustomButton from "../../components/CustomButton/CustomButton";
 // import { useNavigate } from "react-router-dom";
 import { BlogContext } from "../../context/BlogContext";
@@ -44,7 +44,7 @@ const Blog = () => {
         }}
       >
         <Container maxWidth="lg">
-          <Typography variant="h4" gutterBottom sx={{ color: "#00adb5" }}>
+          <Typography variant="h3" gutterBottom sx={{ color: "#00ADB5" }}>
             Blog
           </Typography>
           <Typography variant="body1" color="gray" mb={4}>
@@ -71,7 +71,7 @@ const Blog = () => {
                     <Typography variant="body2" paragraph color="white">
                       {post.summary}
                     </Typography>
-                    <CardActions sx={{ px: 2, pb: 2 }}>
+                    <CardActions sx={{ p: 0, pt: 1 }}>
                       <CustomButton
                         variant="outlined"
                         to={`/blog/${post.id}`}
@@ -102,8 +102,16 @@ const Blog = () => {
               count={Math.ceil(blogsData.length / postsPerPage)}
               page={currentPage}
               onChange={handlePageChange}
-              color="primary"
-              sx={{ ".MuiPaginationItem-text": { color: "white" } }}
+              sx={{
+                color: "white",
+                ".MuiPaginationItem-text": { color: "white" },
+                ".MuiPaginationItem-page.Mui-selected": {
+                  background: "#00ADB5",
+                },
+                ".MuiPaginationItem-page.Mui-selected:hover": {
+                  background: "#00ADB5",
+                },
+              }}
             />
           </Box>
         </Container>

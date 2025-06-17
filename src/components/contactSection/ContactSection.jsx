@@ -10,9 +10,9 @@ import {
   useTheme,
 } from "@mui/material";
 import toast from "react-hot-toast";
-// import "react-toastify/dist/ReactToastify.css";
 import assets from "../../assets/assets";
 import CustomButton from "../CustomButton/CustomButton";
+import CustomTextField from "../CustomTextField/CustomTextField";
 
 const ContactSection = () => {
   const theme = useTheme();
@@ -25,20 +25,11 @@ const ContactSection = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    // البيانات صالحة لأن المتصفح تحقق منها بسبب "required"
+    toast.success("Your message has been sent successfully!");
+
     console.log("Message sent:", form);
-
-    toast.success("Your message has been sent successfully!", {
-      style: {
-        background: "#1e1e1e",
-        color: "#fff",
-        border: "1px solid #00ADB5",
-      },
-      iconTheme: {
-        primary: "#00ADB5",
-        secondary: "#fff",
-      },
-    });
-
     setForm({ name: "", email: "", message: "" });
   };
 
@@ -80,7 +71,7 @@ const ContactSection = () => {
           >
             <Box
               component="img"
-              src={assets.contact}
+              src={assets.contact1}
               alt="Contact Support"
               sx={{
                 width: "100%",
@@ -109,55 +100,48 @@ const ContactSection = () => {
               flex: 1,
               backgroundColor: "#1e1e1e",
               borderRadius: 2,
-              p: 4,
+              py: 4,
+              px: { xs: 2, md: 4 },
               maxWidth: 600,
               width: "100%",
             }}
           >
-            <Stack spacing={3}>
-              <TextField
+            <Stack spacing={3} sx={{ width: "100%" }}>
+              <CustomTextField
                 label="Full Name"
                 name="name"
                 value={form.name}
                 onChange={handleChange}
-                fullWidth
+                sx={{ backgroundColor: "#2a2a2a" }}
                 required
-                variant="filled"
-                InputProps={{ style: { color: "white" } }}
-                InputLabelProps={{ style: { color: "#aaaaaa" } }}
-                sx={{ backgroundColor: "#2a2a2a", borderRadius: 1 }}
               />
-
-              <TextField
+              <CustomTextField
                 label="Email"
                 name="email"
-                type="email"
                 value={form.email}
                 onChange={handleChange}
-                fullWidth
+                sx={{ backgroundColor: "#2a2a2a" }}
                 required
-                variant="filled"
-                InputProps={{ style: { color: "white" } }}
-                InputLabelProps={{ style: { color: "#aaaaaa" } }}
-                sx={{ backgroundColor: "#2a2a2a", borderRadius: 1 }}
               />
-
-              <TextField
+              <CustomTextField
                 label="Message"
                 name="message"
                 value={form.message}
                 onChange={handleChange}
-                fullWidth
+                sx={{ backgroundColor: "#2a2a2a" }}
                 required
                 multiline
                 rows={4}
-                variant="filled"
-                InputProps={{ style: { color: "white" } }}
-                InputLabelProps={{ style: { color: "#aaaaaa" } }}
-                sx={{ backgroundColor: "#2a2a2a", borderRadius: 1 }}
               />
 
-              <CustomButton type="submit">Send Message</CustomButton>
+              <CustomButton
+                type="submit"
+                // onClick={
+                //   // toast.success("Your message has been sent successfully!")
+                // }
+              >
+                Send Message
+              </CustomButton>
             </Stack>
           </Box>
         </Box>

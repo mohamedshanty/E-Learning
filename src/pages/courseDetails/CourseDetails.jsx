@@ -132,7 +132,11 @@ const CourseDetails = () => {
 
             <Grid
               size={{ xs: 12, md: 4 }}
-              sx={{ maxHeight: "80vh", overflowY: "auto", mt: -6 }}
+              sx={{
+                maxHeight: "80vh",
+                overflowY: "auto",
+                mt: { xs: 0, md: -6 },
+              }}
             >
               <Typography variant="h6" sx={{ color: "#fff", mb: 2 }}>
                 Lectures

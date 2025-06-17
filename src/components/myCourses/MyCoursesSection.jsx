@@ -19,6 +19,7 @@ import CustomButton from "../CustomButton/CustomButton";
 import CustomTextField from "../CustomTextField/CustomTextField";
 import { CoursesContext } from "../../context/CoursesContext";
 import Autocomplete from "@mui/material/Autocomplete";
+import toast from "react-hot-toast";
 
 const options = [
   "React",
@@ -59,10 +60,10 @@ const MyCoursesSection = () => {
       })),
     };
 
-    // فقط طباعة المعلومات في الكونسل بدون إضافة
+    toast.success("Your new course has added successfully!");
+
     console.log("New Course Data:", newCourse);
 
-    // ثم اغلق الديالوج
     handleClose();
   };
 
