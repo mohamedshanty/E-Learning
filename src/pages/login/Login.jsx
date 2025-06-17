@@ -13,7 +13,7 @@ import {
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { Link, useNavigate } from "react-router-dom";
-import CustomTextField from "../../components/CustomTextField/CustomTextField";
+import CustomTextField from "../../components/customTextField/CustomTextField";
 
 const Login = () => {
   const [formData, setFormData] = useState({

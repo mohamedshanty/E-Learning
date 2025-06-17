@@ -12,7 +12,7 @@ import {
 import toast from "react-hot-toast";
 import assets from "../../assets/assets";
 import CustomButton from "../CustomButton/CustomButton";
-import CustomTextField from "../CustomTextField/CustomTextField";
+import CustomTextField from "../customTextField/CustomTextField";
 
 const ContactSection = () => {
   const theme = useTheme();
