@@ -16,7 +16,7 @@ import {
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import CustomButton from "../CustomButton/CustomButton";
-import CustomTextField from "../CustomTextField/CustomTextField";
+import CustomTextField from "../customTextField/CustomTextField";
 import { CoursesContext } from "../../context/CoursesContext";
 import Autocomplete from "@mui/material/Autocomplete";
 import toast from "react-hot-toast";

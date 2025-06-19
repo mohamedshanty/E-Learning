@@ -23,6 +23,7 @@ const Login = () => {
     password: "",
     confirmPassword: "",
   });
+
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [currState, setCurrState] = useState("Sign Up");
