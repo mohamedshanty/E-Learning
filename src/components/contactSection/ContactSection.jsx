@@ -26,7 +26,6 @@ const ContactSection = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    // البيانات صالحة لأن المتصفح تحقق منها بسبب "required"
     toast.success("Your message has been sent successfully!");
 
     console.log("Message sent:", form);

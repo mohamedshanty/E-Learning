@@ -34,7 +34,7 @@ const Home = () => {
       <Box component={"section"} id="about">
         <AboutSection />
       </Box>
-      <Box component={"section"} id="my-courses">
+      <Box component={"section"} id="my-courses" sx={{ mt: -2 }}>
         <MyCoursesSection />
       </Box>
       <Box component={"section"} id="blog">

@@ -1,9 +1,7 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useContext } from "react";
 import {
   Container,
   Typography,
-  Tabs,
-  Tab,
   Grid,
   Card,
   CardContent,
@@ -14,13 +12,12 @@ import {
   Chip,
   Pagination,
 } from "@mui/material";
+
 import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
 import LinkIcon from "@mui/icons-material/Link";
-import PlayCircleFilledIcon from "@mui/icons-material/PlayCircleFilled";
-import { resourcesData } from "../../data/resourcesData";
-import Header from "../../components/header/Header";
-
 import OndemandVideoIcon from "@mui/icons-material/OndemandVideo";
+import Header from "../../components/header/Header";
+import { ResourcesContext } from "../../context/ResourcesContext ";
 
 const typeIcons = {
   PDF: <PictureAsPdfIcon />,
@@ -29,27 +26,23 @@ const typeIcons = {
 };
 
 const filterOptions = ["All", "PDF", "Video", "Link"];
-
 const itemsPerPage = 6;
 
 const Resources = () => {
+  const { resources } = useContext(ResourcesContext);
   const [filter, setFilter] = useState("All");
   const [page, setPage] = useState(1);
 
   const filtered = useMemo(() => {
     return filter === "All"
-      ? resourcesData
-      : resourcesData.filter((res) => res.type === filter);
-  }, [filter]);
+      ? resources
+      : resources.filter((res) => res.type === filter);
+  }, [resources, filter]);
 
   const paginated = useMemo(() => {
     const start = (page - 1) * itemsPerPage;
     return filtered.slice(start, start + itemsPerPage);
   }, [filtered, page]);
-
-  const handleClick = () => {
-    window.open(resourcesData.url, "_blank");
-  };
 
   return (
     <>
@@ -75,7 +68,10 @@ const Resources = () => {
               <Chip
                 key={option}
                 label={option}
-                onClick={() => setFilter(option)}
+                onClick={() => {
+                  setFilter(option);
+                  setPage(1);
+                }}
                 sx={{
                   backgroundColor: filter === option ? "#00ADB5" : "#1e1e1e",
                   color: filter === option ? "#ffffff" : "#aaaaaa",
@@ -121,9 +117,7 @@ const Resources = () => {
                   <CardActions>
                     <Button
                       size="small"
-                      onClick={handleClick}
-                      target="_blank"
-                      rel="noopener"
+                      onClick={() => window.open(res.url, "_blank")}
                       sx={{ color: "#00ADB5" }}
                     >
                       {res.type === "PDF" ? "Download" : "Open"}

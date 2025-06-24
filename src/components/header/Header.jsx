@@ -11,7 +11,6 @@ import {
   Drawer,
   List,
   ListItem,
-  ListItemIcon,
   ListItemText,
   Container,
   Button,
@@ -21,18 +20,18 @@ import {
   AccountCircle,
   Logout,
   Menu as MenuIcon,
-  Home,
-  Info,
-  School,
 } from "@mui/icons-material";
 import { useLocation, useNavigate } from "react-router-dom";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "../../config/firebase";
+import assets from "../../assets/assets";
 
 const navigationItems = [
   { id: "home", label: "Home" },
   { id: "about", label: "About" },
   { id: "my-courses", label: "My Courses" },
   { id: "blog", label: "Blog" },
-  { id: "resouces", label: "Resouces" },
+  { id: "resources", label: "Resources" },
   { id: "contact-us", label: "Contact Us" },
 ];
 
@@ -40,22 +39,76 @@ const Header = () => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const location = useLocation();
+  const [userData, setUserData] = useState(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem("uid"));
 
+  const location = useLocation();
   const navigate = useNavigate();
 
-  const handleScroll = () => {
-    setScrolled(window.scrollY > 50);
-  };
+  useEffect(() => {
+    const fetchUserData = async () => {
+      const uid = localStorage.getItem("uid");
+      if (!uid) {
+        setIsLoggedIn(false);
+        setUserData(null);
+        return;
+      }
+
+      try {
+        const docUserRef = doc(db, "users", uid);
+        const docProfileRef = doc(db, "profiles", uid);
+
+        const [userSnap, profileSnap] = await Promise.all([
+          getDoc(docUserRef),
+          getDoc(docProfileRef),
+        ]);
+
+        if (userSnap.exists()) {
+          const user = userSnap.data();
+          const profile = profileSnap.exists() ? profileSnap.data() : {};
+
+          const avatarUrl =
+            profile.imageUrl || user.avatar || assets.avatar_icon;
+
+          setUserData({
+            ...user,
+            avatar: avatarUrl,
+          });
+          setIsLoggedIn(true);
+        } else {
+          setUserData(null);
+          setIsLoggedIn(false);
+        }
+      } catch (error) {
+        console.error("Failed to fetch user data:", error);
+        setUserData(null);
+        setIsLoggedIn(false);
+      }
+    };
+
+    fetchUserData();
+  }, []);
 
   useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 50);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   const handleMenu = (event) => setAnchorEl(event.currentTarget);
-  const handleClose = () => {
+  const handleCloseMenu = () => setAnchorEl(null);
+
+  const handleProfile = () => {
+    handleCloseMenu();
     navigate("/profile-page");
+  };
+
+  const handleLogout = () => {
+    handleCloseMenu();
+    localStorage.clear();
+    setUserData(null);
+    setIsLoggedIn(false);
+    navigate("/");
   };
 
   const handleNavClick = (sectionId) => {
@@ -81,11 +134,11 @@ const Header = () => {
           boxShadow: "none",
           backdropFilter: scrolled ? "blur(10px)" : "none",
           py: 2,
+          zIndex: (theme) => theme.zIndex.drawer + 1,
         }}
       >
-        <Container maxWidth="lg" style={{ padding: 0 }}>
+        <Container maxWidth="lg" sx={{ padding: 0 }}>
           <Toolbar sx={{ justifyContent: "space-between" }}>
-            {/* Logo */}
             <Typography
               variant="h5"
               sx={{ fontWeight: "bold", color: "#00ADB5", cursor: "pointer" }}
@@ -100,7 +153,7 @@ const Header = () => {
               UniLearn
             </Typography>
 
-            {/* Links (hidden on small screens) */}
+            {/* روابط التنقل - عرض على الشاشات الكبيرة */}
             <Box sx={{ display: { xs: "none", md: "flex" }, gap: 2 }}>
               {navigationItems.map((item) => (
                 <Button
@@ -119,48 +172,89 @@ const Header = () => {
               ))}
             </Box>
 
-            {/* Right side icons */}
             <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-              <IconButton
-                color="inherit"
-                onClick={() => navigate("/watch-later")}
-              >
-                <VideoLibrary />
-              </IconButton>
+              {isLoggedIn && userData ? (
+                <>
+                  {userData.role === "admin" && (
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      onClick={() => navigate("/dashboard")}
+                      sx={{
+                        mr: 2,
+                        fontSize: "0.75rem",
+                        padding: "4px 10px",
+                        minWidth: "80px",
+                        color: "#00ADB5",
+                        borderColor: "#00ADB5",
+                        "&:hover": {
+                          borderColor: "#008C9E",
+                          backgroundColor: "rgba(0, 173, 181, 0.1)",
+                        },
+                      }}
+                    >
+                      Dashboard
+                    </Button>
+                  )}
 
-              {/* Hamburger menu for small screens */}
-              <IconButton
-                onClick={toggleDrawer(true)}
-                sx={{ display: { xs: "block", md: "none" } }}
-                color="inherit"
-              >
-                <MenuIcon />
-              </IconButton>
+                  <IconButton
+                    color="inherit"
+                    onClick={() => navigate("/watch-later")}
+                  >
+                    <VideoLibrary />
+                  </IconButton>
 
-              {/* Avatar */}
-              <IconButton onClick={handleMenu} color="inherit">
-                <Avatar alt="User" src="/path-to-image.jpg" />
-              </IconButton>
-              <Menu
-                anchorEl={anchorEl}
-                open={Boolean(anchorEl)}
-                onClose={handleClose}
-              >
-                <MenuItem onClick={handleClose}>
-                  <AccountCircle sx={{ mr: 1 }} />
-                  Profile
-                </MenuItem>
-                <MenuItem onClick={handleClose}>
-                  <Logout sx={{ mr: 1 }} />
-                  Logout
-                </MenuItem>
-              </Menu>
+                  <IconButton
+                    onClick={toggleDrawer(true)}
+                    sx={{ display: { xs: "block", md: "none" } }}
+                    color="inherit"
+                  >
+                    <MenuIcon />
+                  </IconButton>
+
+                  <IconButton onClick={handleMenu} color="inherit" size="large">
+                    <Avatar
+                      alt={userData.fullName || "User"}
+                      src={userData.avatar}
+                      sx={{ width: 36, height: 36 }}
+                    />
+                  </IconButton>
+
+                  <Menu
+                    anchorEl={anchorEl}
+                    open={Boolean(anchorEl)}
+                    onClose={handleCloseMenu}
+                    anchorOrigin={{
+                      vertical: "bottom",
+                      horizontal: "right",
+                    }}
+                    transformOrigin={{
+                      vertical: "top",
+                      horizontal: "right",
+                    }}
+                  >
+                    <MenuItem onClick={handleProfile}>
+                      <AccountCircle sx={{ mr: 1 }} /> Profile
+                    </MenuItem>
+                    <MenuItem onClick={handleLogout}>
+                      <Logout sx={{ mr: 1 }} /> Logout
+                    </MenuItem>
+                  </Menu>
+                </>
+              ) : (
+                <Button
+                  variant="outlined"
+                  sx={{ color: "#00ADB5", borderColor: "#00ADB5", ml: 1 }}
+                  onClick={() => navigate("/")}
+                >
+                  Login / Sign Up
+                </Button>
+              )}
             </Box>
           </Toolbar>
         </Container>
       </AppBar>
 
-      {/* Drawer for mobile links */}
       <Drawer anchor="right" open={drawerOpen} onClose={toggleDrawer(false)}>
         <Box
           sx={{
@@ -170,7 +264,6 @@ const Header = () => {
             color: "white",
           }}
           role="presentation"
-          // غلق الـ Drawer عند النقر على أي مكان داخل الصندوق (يمكن إزالة هذا إذا تريد فقط غلق عند اختيار رابط)
           onClick={toggleDrawer(false)}
         >
           <List>
@@ -180,7 +273,7 @@ const Header = () => {
                 key={item.id}
                 onClick={() => {
                   handleNavClick(item.id);
-                  setDrawerOpen(false); // غلق الـ Drawer عند اختيار الرابط
+                  setDrawerOpen(false);
                 }}
               >
                 <ListItemText primary={item.label} />

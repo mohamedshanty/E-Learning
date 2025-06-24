@@ -1,61 +1,76 @@
-// Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
+import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
+} from "firebase/auth";
+import { getFirestore, doc, setDoc, getDoc } from "firebase/firestore";
 
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
   apiKey: "AIzaSyB8CUlqhVBPYBv4AIH40fRf5HyEIuGYYjY",
   authDomain: "e-learning-9fecf.firebaseapp.com",
   projectId: "e-learning-9fecf",
-  storageBucket: "e-learning-9fecf.firebasestorage.app",
+  storageBucket: "e-learning-9fecf.appspot.com",
   messagingSenderId: "323101797845",
   appId: "1:323101797845:web:822a0bfd1a020c3704215c",
   measurementId: "G-2CND6G3H57",
 };
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-const signup = async (
-  firstName,
-  lastName,
-  email,
-  password
-  confirmPassword,
-) => {
+const signup = async (firstName, lastName, email, password) => {
   try {
     const res = await createUserWithEmailAndPassword(auth, email, password);
     const user = res.user;
+
     await setDoc(doc(db, "users", user.uid), {
       id: user.uid,
-      username: username.toLowerCase(),
+      fullName: `${firstName} ${lastName}`,
       email,
-      name: "",
       avatar: "",
-      bio: "Hey, There i am useing chat app",
+      role: "student",
       lastSeen: Date.now(),
+      enrolledCourses: [],
+      profileCompleted: false,
     });
-    await setDoc(doc(db, "chats", user.uid), {
-      chatData: [],
-    });
+
+    localStorage.setItem("uid", user.uid);
   } catch (error) {
-    console.error(error);
-    toast.error(error.code.split("/")[1].split("-").join(" "));
+    console.error("Signup Error:", error);
+    throw error;
   }
 };
 
 const login = async (email, password) => {
   try {
-    await signInWithEmailAndPassword(auth, email, password);
+    const userCredential = await signInWithEmailAndPassword(
+      auth,
+      email,
+      password
+    );
+    const uid = userCredential.user.uid;
+
+    const userDoc = await getDoc(doc(db, "users", uid));
+    const userData = userDoc.data();
+
+    localStorage.setItem("uid", uid);
+    localStorage.setItem("role", userData.role);
+    localStorage.setItem(
+      "profileCompleted",
+      userData.profileCompleted ? "true" : "false"
+    );
+
+    return {
+      uid,
+      role: userData.role,
+      profileCompleted: userData.profileCompleted || false,
+    };
   } catch (error) {
-    console.error(error);
-    toast.error(error.code.split("/")[1].split("-").join(" "));
+    console.error("Login Error:", error);
+    throw error;
   }
 };
 
@@ -63,9 +78,9 @@ const logout = async () => {
   try {
     await signOut(auth);
   } catch (error) {
-    console.error(error);
-    toast.error(error.code.split("/")[1].split("-").join(" "));
+    console.error("Logout Error:", error);
+    throw error;
   }
 };
 
-export { signup, login, logout, auth, db };
+export { app, auth, db, signup, login, logout };

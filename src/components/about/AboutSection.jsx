@@ -3,7 +3,6 @@ import {
   Box,
   Typography,
   Container,
-  Grid,
   List,
   ListItem,
   ListItemIcon,
@@ -22,8 +21,16 @@ const AboutSection = () => {
       }}
     >
       <Container maxWidth="lg">
-        <Grid container spacing={5} alignItems="center">
-          <Grid size={{ xs: 12, md: 6 }}>
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: { xs: "column", md: "row" },
+            alignItems: "center",
+            gap: 5,
+          }}
+        >
+          {/* Left column */}
+          <Box sx={{ flex: 1 }}>
             <Typography
               variant="h4"
               sx={{ color: "#00ADB5", fontWeight: "bold", mb: 2 }}
@@ -55,9 +62,16 @@ const AboutSection = () => {
                 </ListItem>
               ))}
             </List>
-          </Grid>
+          </Box>
 
-          <Grid size={{ xs: 12, md: 6 }}>
+          {/* Right column */}
+          <Box
+            sx={{
+              flex: 1,
+              display: "flex",
+              justifyContent: "center",
+            }}
+          >
             <Box
               component="img"
               src={assets.about}
@@ -65,12 +79,11 @@ const AboutSection = () => {
               sx={{
                 width: "100%",
                 maxWidth: 500,
-                mx: "auto",
                 display: "block",
               }}
             />
-          </Grid>
-        </Grid>
+          </Box>
+        </Box>
       </Container>
     </Box>
   );

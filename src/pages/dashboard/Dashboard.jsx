@@ -1,126 +1,62 @@
-import React, { useState, useContext } from "react";
-import {
-  Container,
-  TextField,
-  Button,
-  Typography,
-  Box,
-  Paper,
-} from "@mui/material";
-import { BlogContext } from "../../context/BlogContext";
+import React, { useState } from "react";
+import { Box, Toolbar, useMediaQuery } from "@mui/material";
+import Sidebar from "../../components/sidebar/Sidebar";
+import { useTheme } from "@mui/material/styles";
+import AdminHeader from "../../components/adminHeader/AdminHeader";
+import { Outlet } from "react-router-dom";
 
 const Dashboard = () => {
-  const { addBlog } = useContext(BlogContext);
-  const [formData, setFormData] = useState({
-    title: "",
-    date: "",
-    image: "",
-    summary: "",
-    content: "",
-    category: "",
-  });
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prevData) => ({ ...prevData, [name]: value }));
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    const newBlog = {
-      id: Date.now(),
-      ...formData,
-    };
-    addBlog(newBlog);
-    setFormData({
-      title: "",
-      date: "",
-      image: "",
-      summary: "",
-      content: "",
-      category: "",
-    });
-  };
+  const handleDrawerToggle = () => setMobileOpen(!mobileOpen);
 
   return (
-    <Container maxWidth="md" sx={{ mt: 4 }}>
-      <Paper sx={{ p: 4, backgroundColor: "#1e1e1e", color: "#fff" }}>
-        <Typography variant="h5" gutterBottom>
-          Add New Blog Post
-        </Typography>
-        <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
-          <TextField
-            fullWidth
-            label="Title"
-            name="title"
-            value={formData.title}
-            onChange={handleChange}
-            margin="normal"
-            InputLabelProps={{ style: { color: "#fff" } }}
-            InputProps={{ style: { color: "#fff" } }}
-          />
-          <TextField
-            fullWidth
-            label="Date"
-            name="date"
-            type="date"
-            value={formData.date}
-            onChange={handleChange}
-            margin="normal"
-            InputLabelProps={{ shrink: true, style: { color: "#fff" } }}
-            InputProps={{ style: { color: "#fff" } }}
-          />
-          <TextField
-            fullWidth
-            label="Image URL"
-            name="image"
-            value={formData.image}
-            onChange={handleChange}
-            margin="normal"
-            InputLabelProps={{ style: { color: "#fff" } }}
-            InputProps={{ style: { color: "#fff" } }}
-          />
-          <TextField
-            fullWidth
-            label="Summary"
-            name="summary"
-            value={formData.summary}
-            onChange={handleChange}
-            margin="normal"
-            multiline
-            rows={2}
-            InputLabelProps={{ style: { color: "#fff" } }}
-            InputProps={{ style: { color: "#fff" } }}
-          />
-          <TextField
-            fullWidth
-            label="Content"
-            name="content"
-            value={formData.content}
-            onChange={handleChange}
-            margin="normal"
-            multiline
-            rows={4}
-            InputLabelProps={{ style: { color: "#fff" } }}
-            InputProps={{ style: { color: "#fff" } }}
-          />
-          <TextField
-            fullWidth
-            label="Category"
-            name="category"
-            value={formData.category}
-            onChange={handleChange}
-            margin="normal"
-            InputLabelProps={{ style: { color: "#fff" } }}
-            InputProps={{ style: { color: "#fff" } }}
-          />
-          <Button type="submit" variant="contained" sx={{ mt: 2 }}>
-            Submit
-          </Button>
+    <>
+      <AdminHeader onMenuClick={handleDrawerToggle} />
+      <Box
+        sx={{
+          display: "flex",
+          minHeight: "100vh",
+          background: "linear-gradient(180deg, #0A0A0A, #101624)",
+          color: "#EEEEEE",
+        }}
+      >
+        {/* Sidebar */}
+        {!isMobile && <Sidebar />}
+        <Sidebar
+          mobileOpen={mobileOpen}
+          handleDrawerToggle={handleDrawerToggle}
+        />
+
+        <Box
+          component="main"
+          sx={{
+            flexGrow: 1,
+            p: { xs: 2, sm: 3 },
+            ml: isMobile ? 0 : "240px",
+            background:
+              "linear-gradient(135deg, rgba(10,10,10,0.9) 0%, rgba(16,22,36,0.9) 100%)",
+            position: "relative",
+            "&::before": {
+              content: '""',
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: "url('/path/to/subtle-pattern.png')",
+              opacity: 0.03,
+              zIndex: -1,
+            },
+          }}
+        >
+          <Toolbar />
+          <Outlet />
         </Box>
-      </Paper>
-    </Container>
+      </Box>
+    </>
   );
 };
-
 export default Dashboard;

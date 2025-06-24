@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext } from "react";
 import { useParams } from "react-router-dom";
 import {
   Box,
@@ -9,25 +9,28 @@ import {
   Card,
   CardMedia,
   CardContent,
-  Button,
   CardActions,
 } from "@mui/material";
-import { Link } from "react-router-dom";
 import Header from "../../components/header/Header";
-import { useContext } from "react";
 import { BlogContext } from "../../context/BlogContext";
 import CustomButton from "../../components/CustomButton/CustomButton";
 
 const BlogDetails = () => {
   const { id } = useParams();
-
   const { blogs } = useContext(BlogContext);
 
-  const blog = blogs.find((item) => item.id === parseInt(id));
-  const related = blogs.filter((item) => item.id !== blog?.id).slice(0, 3);
+  const blog = blogs.find((item) => item.id === id);
+  const related = blogs.filter((item) => item.id !== id).slice(0, 3);
 
-  if (!blog) return <Typography color="error">Blog not found</Typography>;
-  console.log(`ID is: $id`);
+  if (!blog)
+    return (
+      <Container sx={{ py: 10 }}>
+        <Typography color="error" variant="h5">
+          Blog not found.
+        </Typography>
+      </Container>
+    );
+
   return (
     <>
       <Header />
@@ -52,6 +55,7 @@ const BlogDetails = () => {
             display="flex"
             flexDirection={{ xs: "column", md: "row" }}
             gap={4}
+            mt={4}
           >
             <Box
               sx={{
@@ -83,16 +87,20 @@ const BlogDetails = () => {
 
             <Box flex={1} color="white">
               <Typography variant="h6" gutterBottom>
-                BLog Overview
+                Blog Overview
               </Typography>
               <Typography variant="body2" color="gray">
                 {blog.summary}
               </Typography>
-              {/* Add more info or buttons here */}
             </Box>
           </Box>
 
-          <Typography variant="body1" color="white" paragraph>
+          <Typography
+            variant="body1"
+            color="white"
+            paragraph
+            sx={{ mt: 4, whiteSpace: "pre-line" }}
+          >
             {blog.content}
           </Typography>
 
@@ -107,7 +115,7 @@ const BlogDetails = () => {
           </Typography>
           <Grid container spacing={3}>
             {related.map((item) => (
-              <Grid size={{ xs: 12, sm: 6, md: 4 }} key={item.id}>
+              <Grid item xs={12} sm={6} md={4} key={item.id}>
                 <Card sx={{ backgroundColor: "#1e1e1e", color: "#fff" }}>
                   <CardMedia
                     component="img"

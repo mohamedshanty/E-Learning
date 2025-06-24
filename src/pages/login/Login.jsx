@@ -2,10 +2,8 @@ import React, { useState } from "react";
 import {
   Container,
   Box,
-  TextField,
   Button,
   Typography,
-  FormControlLabel,
   IconButton,
   InputAdornment,
   CircularProgress,
@@ -14,6 +12,8 @@ import {
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { Link, useNavigate } from "react-router-dom";
 import CustomTextField from "../../components/customTextField/CustomTextField";
+import { login, signup } from "../../config/firebase";
+import toast from "react-hot-toast";
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -22,6 +22,7 @@ const Login = () => {
     email: "",
     password: "",
     confirmPassword: "",
+    role: "student",
   });
 
   const [showPassword, setShowPassword] = useState(false);
@@ -30,11 +31,38 @@ const Login = () => {
 
   const navigate = useNavigate();
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
-    navigate("/profile");
+
+    try {
+      if (currState === "Login") {
+        await login(formData.email, formData.password);
+        navigate("/home");
+      } else {
+        if (formData.password !== formData.confirmPassword) {
+          toast.error("Passwords do not match");
+          setLoading(false);
+          return;
+        }
+
+        await signup(
+          formData.firstName,
+          formData.lastName,
+          formData.email,
+          formData.password,
+          formData.role
+        );
+        navigate("/profile");
+      }
+    } catch (error) {
+      console.error("Auth Error:", error);
+      toast.error("Authentication failed");
+    } finally {
+      setLoading(false);
+    }
   };
+
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
@@ -73,7 +101,7 @@ const Login = () => {
               gap: 4,
             }}
           >
-            {currState === "Sign Up" ? (
+            {currState === "Sign Up" && (
               <Box sx={{ display: "flex", gap: 2 }}>
                 <CustomTextField
                   label="First Name"
@@ -90,7 +118,7 @@ const Login = () => {
                   onChange={handleChange}
                 />
               </Box>
-            ) : null}
+            )}
 
             <CustomTextField
               label="Email Address"
@@ -121,7 +149,7 @@ const Login = () => {
               }}
             />
 
-            {currState === "Sign Up" ? (
+            {currState === "Sign Up" && (
               <CustomTextField
                 label="Confirm Password"
                 name="confirmPassword"
@@ -143,7 +171,7 @@ const Login = () => {
                   ),
                 }}
               />
-            ) : null}
+            )}
 
             <Button
               type="submit"
@@ -170,32 +198,23 @@ const Login = () => {
               ) : (
                 "Login"
               )}
-              {/* {currState === "Sign Up" ? "Sign Up" : "Login"} */}
             </Button>
 
-            {currState === "Sign Up" ? (
-              <Typography variant="body2" align="center" sx={{ color: "#ccc" }}>
-                Already have an account?{" "}
-                <span
-                  onClick={() => setCurrState("Login")}
-                  style={{ color: "#90caf9", cursor: "pointer" }}
-                >
-                  Sign In
-                </span>
-              </Typography>
-            ) : (
-              <Typography variant="body2" align="center" sx={{ color: "#ccc" }}>
-                Create an account{" "}
-                <span
-                  onClick={() => setCurrState("Sign Up")}
-                  style={{ color: "#90caf9", cursor: "pointer" }}
-                >
-                  Sign Up
-                </span>
-              </Typography>
-            )}
+            <Typography variant="body2" align="center" sx={{ color: "#ccc" }}>
+              {currState === "Sign Up"
+                ? "Already have an account? "
+                : "Create an account "}
+              <span
+                onClick={() =>
+                  setCurrState(currState === "Sign Up" ? "Login" : "Sign Up")
+                }
+                style={{ color: "#90caf9", cursor: "pointer" }}
+              >
+                {currState === "Sign Up" ? "Sign In" : "Sign Up"}
+              </span>
+            </Typography>
 
-            {currState === "Sign Up" ? null : (
+            {currState === "Login" && (
               <Link
                 to="/forget"
                 style={{
@@ -206,7 +225,7 @@ const Login = () => {
                   padding: 0,
                 }}
               >
-                Forget Passord ?
+                Forget Password?
               </Link>
             )}
           </Box>

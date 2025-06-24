@@ -6,19 +6,15 @@ import {
   CardMedia,
   CardContent,
   Typography,
-  Button,
   Pagination,
   Container,
   CardActions,
 } from "@mui/material";
 import Header from "../../components/header/Header";
-import { blogsData } from "../../data/blogsData";
 import CustomButton from "../../components/CustomButton/CustomButton";
-// import { useNavigate } from "react-router-dom";
 import { BlogContext } from "../../context/BlogContext";
 
 const Blog = () => {
-  //   const navigate = useNavigate();
   const { blogs } = useContext(BlogContext);
 
   const [currentPage, setCurrentPage] = useState(1);
@@ -31,16 +27,15 @@ const Blog = () => {
   const handlePageChange = (event, value) => {
     setCurrentPage(value);
   };
+
   return (
     <>
       <Header />
       <Box
         sx={{
-          backgroundColor: "#121212",
-          minHeight: "100vh",
-          py: 15,
           background: "linear-gradient(to bottom, #0A0A0A, #101624)",
-          color: "red",
+          py: { xs: 8, md: 15 },
+          px: { xs: 2, sm: 3 },
         }}
       >
         <Container maxWidth="lg">
@@ -51,6 +46,7 @@ const Blog = () => {
             Explore educational articles, platform updates, and helpful study
             tips curated for university students.
           </Typography>
+
           <Grid container spacing={4} key={currentPage}>
             {currentPosts.map((post) => (
               <Grid size={{ xs: 12, sm: 6, md: 4 }} key={post.id}>
@@ -90,6 +86,7 @@ const Blog = () => {
               </Grid>
             ))}
           </Grid>
+
           <Box
             sx={{
               display: "flex",
@@ -99,7 +96,7 @@ const Blog = () => {
             }}
           >
             <Pagination
-              count={Math.ceil(blogsData.length / postsPerPage)}
+              count={Math.ceil(blogs.length / postsPerPage)}
               page={currentPage}
               onChange={handlePageChange}
               sx={{

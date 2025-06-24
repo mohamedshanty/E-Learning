@@ -1,4 +1,10 @@
-import React, { useContext, useState } from "react";
+import React, {
+  useContext,
+  useState,
+  useEffect,
+  useMemo,
+  useCallback,
+} from "react";
 import {
   Box,
   Typography,
@@ -13,6 +19,13 @@ import {
   DialogActions,
   Button,
   Chip,
+  Skeleton,
+  CardActions,
+  CircularProgress,
+  ThemeProvider,
+  createTheme,
+  IconButton,
+  Tooltip,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import CustomButton from "../CustomButton/CustomButton";
@@ -20,234 +33,525 @@ import CustomTextField from "../customTextField/CustomTextField";
 import { CoursesContext } from "../../context/CoursesContext";
 import Autocomplete from "@mui/material/Autocomplete";
 import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
+import { db } from "../../config/firebase";
+import {
+  doc,
+  getDoc,
+  updateDoc,
+  collection,
+  getDocs,
+} from "firebase/firestore";
+import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
+import RefreshIcon from "@mui/icons-material/Refresh";
 
-const options = [
-  "React",
-  "JavaScript",
-  "Node.js",
-  "Express",
-  "MongoDB",
-  "Redux",
-  "TypeScript",
-];
+const theme = createTheme({
+  palette: {
+    primary: {
+      main: "#00ADB5",
+    },
+    secondary: {
+      main: "#393E46",
+    },
+    background: {
+      default: "#0A0A0A",
+      paper: "#1e1e1e",
+    },
+    text: {
+      primary: "#EEEEEE",
+      secondary: "#AAAAAA",
+    },
+  },
+});
+
+const topicsByYear = {
+  1: ["HTML", "CSS"],
+  2: ["HTML", "CSS", "JavaScript", "Git and Github"],
+  3: ["React", "Redux", "TypeScript"],
+  4: ["Node.js", "Express", "MongoDB"],
+  5: ["Advanced JS", "Testing", "Performance"],
+  6: ["Project", "Deployment", "CI/CD"],
+};
 
 const MyCoursesSection = () => {
-  const { courses, addCourse } = useContext(CoursesContext);
-
+  const { courses, loading, error, refreshCourses } =
+    useContext(CoursesContext);
+  const [userProfile, setUserProfile] = useState(null);
+  const [userData, setUserData] = useState(null);
   const [open, setOpen] = useState(false);
-  const [selectedOptions, setSelectedOptions] = useState([]);
+  const [courseData, setCourseData] = useState({
+    topics: [],
+  });
+  const [isAdding, setIsAdding] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const navigate = useNavigate();
 
-  const handleOpen = () => setOpen(true);
+  useEffect(() => {
+    const fetchUserData = async () => {
+      const userId = localStorage.getItem("uid");
+      if (userId) {
+        const [profileDoc, userDoc] = await Promise.all([
+          getDoc(doc(db, "profiles", userId)),
+          getDoc(doc(db, "users", userId)),
+        ]);
+
+        if (profileDoc.exists()) {
+          setUserProfile(profileDoc.data());
+        }
+        if (userDoc.exists()) {
+          setUserData(userDoc.data());
+        }
+      }
+    };
+    fetchUserData();
+  }, []);
+
+  const handleOpen = () => {
+    if (!userProfile?.year) {
+      toast.error("Please complete your profile first");
+      navigate("/profile");
+      return;
+    }
+    setOpen(true);
+  };
+
   const handleClose = () => {
     setOpen(false);
-    setSelectedOptions([]);
+    setCourseData({ topics: [] });
   };
 
-  const handleAddCourse = () => {
-    if (selectedOptions.length === 0) return;
+  const handleAddCourse = useCallback(async () => {
+    if (courseData.topics.length === 0 || !userProfile?.year) return;
 
-    const newId = courses.length > 0 ? courses[courses.length - 1].id + 1 : 1;
+    setIsAdding(true);
+    try {
+      const userId = localStorage.getItem("uid");
+      if (!userId) {
+        toast.error("User ID not found. Please log in again.");
+        setIsAdding(false);
+        return;
+      }
 
-    const totalLectures = selectedOptions.length * 5;
+      const coursesSnapshot = await getDocs(collection(db, "courses"));
+      const allCourses = coursesSnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
 
-    const newCourse = {
-      id: newId,
-      title: selectedOptions.join(", "),
-      lectures: Array.from({ length: totalLectures }, (_, i) => ({
-        id: i + 1,
-        title: `Lecture ${i + 1}`,
-        isCompleted: false,
-      })),
-    };
+      const matchingCourses = allCourses.filter((course) =>
+        course.topics?.some((topic) => courseData.topics.includes(topic))
+      );
 
-    toast.success("Your new course has added successfully!");
+      if (matchingCourses.length === 0) {
+        toast.error("No courses found matching your selected topics");
+        setIsAdding(false);
+        return;
+      }
 
-    console.log("New Course Data:", newCourse);
+      const userRef = doc(db, "users", userId);
+      const currentEnrolled = userData?.enrolledCourses || [];
+      const newEnrolled = [
+        ...new Set([...currentEnrolled, ...matchingCourses.map((c) => c.id)]),
+      ];
 
-    handleClose();
-  };
+      await updateDoc(userRef, {
+        enrolledCourses: newEnrolled,
+      });
 
-  const calculateProgress = (course) => {
-    if (!course.lectures || course.lectures.length === 0) return 0;
+      const profileRef = doc(db, "profiles", userId);
+      const currentTopics = userProfile?.topics || [];
+      const newTopics = [...new Set([...currentTopics, ...courseData.topics])];
 
-    const completed = course.lectures.filter((lec) => lec.isCompleted).length;
-    return Math.round((completed / course.lectures.length) * 100);
-  };
+      await updateDoc(profileRef, {
+        topics: newTopics,
+      });
 
-  return (
-    <Box
-      sx={{
-        background: "linear-gradient(to bottom, #0A0A0A, #101624)",
-        py: 10,
-        mt: -2,
-      }}
-    >
-      <Container maxWidth="lg">
+      setUserProfile((prev) => ({ ...prev, topics: newTopics }));
+      setUserData((prev) => ({ ...prev, enrolledCourses: newEnrolled }));
+
+      toast.success(`${matchingCourses.length} courses added successfully!`);
+      await refreshCourses();
+      handleClose();
+    } catch (error) {
+      console.error("Error adding courses:", error);
+      toast.error("Failed to add courses");
+    } finally {
+      setIsAdding(false);
+    }
+  }, [courseData, userData, userProfile, refreshCourses]);
+
+  const handleRefresh = useCallback(async () => {
+    try {
+      setIsRefreshing(true);
+      await refreshCourses();
+    } catch (err) {
+      console.error("Error refreshing courses:", err);
+    } finally {
+      setIsRefreshing(false);
+    }
+  }, [refreshCourses]);
+
+  const filteredCourses = useMemo(() => {
+    if (!userData?.enrolledCourses?.length) return [];
+
+    return courses.filter(
+      (course) =>
+        userData.enrolledCourses.includes(course.id) &&
+        (!userProfile?.topics?.length ||
+          course.topics?.some((topic) => userProfile.topics.includes(topic)))
+    );
+  }, [courses, userData, userProfile]);
+
+  if (error) {
+    return (
+      <ThemeProvider theme={theme}>
         <Box
           sx={{
+            background: "linear-gradient(to bottom, #0A0A0A, #101624)",
             display: "flex",
-            justifyContent: "space-between",
+            justifyContent: "center",
             alignItems: "center",
-            flexWrap: "wrap",
-            gap: 2,
-            mb: 4,
+            flexDirection: "column",
+            py: 10,
           }}
         >
-          <Typography
-            variant="h4"
-            sx={{
-              color: "#00ADB5",
-              fontWeight: "bold",
-              fontSize: { xs: "1.5rem", sm: "2rem" },
-            }}
-          >
-            My Courses
+          <ErrorOutlineIcon color="error" sx={{ fontSize: 60, mb: 2 }} />
+          <Typography variant="h5" color="error" gutterBottom>
+            Failed to load courses
           </Typography>
+          <Typography color="text.secondary" sx={{ mb: 3 }}>
+            {error.message || "Please check your connection and try again"}
+          </Typography>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleRefresh}
+            startIcon={<RefreshIcon />}
+            disabled={isRefreshing}
+          >
+            {isRefreshing ? "Refreshing..." : "Retry"}
+          </Button>
+        </Box>
+      </ThemeProvider>
+    );
+  }
 
-          <CustomButton
-            startIcon={<AddIcon />}
-            onClick={handleOpen}
+  return (
+    <ThemeProvider theme={theme}>
+      <Box
+        sx={{
+          background: "linear-gradient(to bottom, #0A0A0A, #101624)",
+          py: 10,
+          minHeight: "100vh",
+        }}
+      >
+        <Container maxWidth="lg">
+          <Box
             sx={{
-              fontSize: { xs: "0.75rem", sm: "1rem" },
-              px: { xs: 2, sm: 3 },
-              py: { xs: 1, sm: 1.5 },
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              flexWrap: "wrap",
+              gap: 2,
+              mb: 4,
             }}
           >
-            Add Course
-          </CustomButton>
-        </Box>
+            <Typography
+              variant="h4"
+              sx={{
+                color: "primary.main",
+                fontWeight: "bold",
+                fontSize: { xs: "1.5rem", sm: "2rem" },
+              }}
+            >
+              My Courses
+            </Typography>
 
-        <Grid container spacing={4}>
-          {courses.map((course) => {
-            const progress = calculateProgress(course);
-            return (
-              <Grid size={{ xs: 12, sm: 6, md: 4 }} key={course.id}>
-                <Card
-                  sx={{
-                    backgroundColor: "#1e1e1e",
-                    color: "white",
-                    borderRadius: 2,
-                  }}
+            <Box sx={{ display: "flex", gap: 2 }}>
+              <Tooltip title="Refresh courses">
+                <IconButton
+                  onClick={handleRefresh}
+                  color="primary"
+                  disabled={isRefreshing}
                 >
-                  <CardContent>
-                    <Typography variant="h6" gutterBottom>
-                      {course.title}
-                    </Typography>
-                    <Typography variant="body2" color="#aaaaaa">
-                      Lectures: {course.lectures.length}
-                    </Typography>
-                    <Box sx={{ mt: 2 }}>
-                      <Typography variant="body2" color="#aaaaaa">
-                        Progress
+                  <RefreshIcon />
+                </IconButton>
+              </Tooltip>
+              <CustomButton
+                startIcon={<AddIcon />}
+                onClick={handleOpen}
+                sx={{
+                  fontSize: { xs: "0.75rem", sm: "1rem" },
+                  px: { xs: 2, sm: 3 },
+                  py: { xs: 1, sm: 1.5 },
+                }}
+              >
+                Add Course
+              </CustomButton>
+            </Box>
+          </Box>
+
+          {isRefreshing && (
+            <Box sx={{ display: "flex", justifyContent: "center", my: 4 }}>
+              <CircularProgress color="primary" />
+            </Box>
+          )}
+
+          {loading ? (
+            <Grid container spacing={4}>
+              {[...Array(6)].map((_, index) => (
+                <Grid size={{ xs: 12, sm: 6, md: 4 }} key={index}>
+                  <Skeleton
+                    variant="rectangular"
+                    height={200}
+                    sx={{
+                      borderRadius: 2,
+                      bgcolor: "secondary.main",
+                    }}
+                  />
+                </Grid>
+              ))}
+            </Grid>
+          ) : filteredCourses.length > 0 ? (
+            <Grid container spacing={4}>
+              {filteredCourses.map((course) => (
+                <Grid size={{ xs: 12, sm: 6, md: 4 }} key={course.id}>
+                  <Card
+                    sx={{
+                      backgroundColor: "background.paper",
+                      height: "100%",
+                      display: "flex",
+                      flexDirection: "column",
+                      transition: "transform 0.3s",
+                      "&:hover": {
+                        transform: "translateY(-5px)",
+                        boxShadow: "0 10px 20px rgba(0,0,0,0.3)",
+                      },
+                    }}
+                  >
+                    <CardContent sx={{ flexGrow: 1 }}>
+                      <Typography
+                        variant="h6"
+                        sx={{
+                          mb: 1,
+                          display: "-webkit-box",
+                          WebkitLineClamp: 2,
+                          WebkitBoxOrient: "vertical",
+                          overflow: "hidden",
+                        }}
+                      >
+                        {course.title}
                       </Typography>
+                      {course.description && (
+                        <Typography
+                          variant="body2"
+                          color="text.secondary"
+                          sx={{
+                            mb: 2,
+                            display: "-webkit-box",
+                            WebkitLineClamp: 2,
+                            WebkitBoxOrient: "vertical",
+                            overflow: "hidden",
+                          }}
+                        >
+                          {course.description}
+                        </Typography>
+                      )}
+                      {course.topics && course.topics.length > 0 && (
+                        <Box sx={{ mb: 2 }}>
+                          <Typography variant="caption" color="text.secondary">
+                            Topics:
+                          </Typography>
+                          <Box
+                            sx={{
+                              display: "flex",
+                              flexWrap: "wrap",
+                              gap: 0.5,
+                              mt: 0.5,
+                            }}
+                          >
+                            {course.topics.map((topic) => (
+                              <Chip
+                                key={topic}
+                                label={topic}
+                                size="small"
+                                sx={{
+                                  backgroundColor: "secondary.main",
+                                  color: "text.primary",
+                                }}
+                              />
+                            ))}
+                          </Box>
+                        </Box>
+                      )}
+                      <Box
+                        sx={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          mb: 1,
+                        }}
+                      >
+                        <Typography variant="body2" color="text.secondary">
+                          {course.lectures?.filter((l) => l.isCompleted)
+                            .length || 0}
+                          /{course.lectures?.length || 0} lectures
+                        </Typography>
+                        <Typography variant="body2" color="primary.main">
+                          {course.progress || 0}%
+                        </Typography>
+                      </Box>
                       <LinearProgress
                         variant="determinate"
-                        value={progress}
+                        value={course.progress || 0}
                         sx={{
                           height: 8,
                           borderRadius: 5,
-                          mt: 1,
-                          backgroundColor: "#333",
+                          backgroundColor: "secondary.main",
                           "& .MuiLinearProgress-bar": {
                             background:
                               "linear-gradient(90deg, #00ADB5, #00FFF0)",
                           },
                         }}
                       />
-                      <Typography
-                        variant="body2"
-                        color="#00ADB5"
-                        sx={{ mt: 0.5, fontWeight: "bold" }}
+                    </CardContent>
+                    <CardActions sx={{ justifyContent: "flex-end" }}>
+                      <Button
+                        onClick={() => {
+                          navigate(`/courses/${course.id}`);
+                        }}
+                        size="small"
+                        color="primary"
+                        sx={{ fontWeight: "bold" }}
                       >
-                        {progress}%
-                      </Typography>
-                    </Box>
-                  </CardContent>
-                </Card>
-              </Grid>
-            );
-          })}
-        </Grid>
+                        Continue
+                      </Button>
+                    </CardActions>
+                  </Card>
+                </Grid>
+              ))}
+            </Grid>
+          ) : (
+            <Box
+              sx={{
+                textAlign: "center",
+                mt: 10,
+                p: 4,
+                backgroundColor: "background.paper",
+                borderRadius: 2,
+              }}
+            >
+              <Typography variant="h6" color="text.primary" sx={{ mb: 2 }}>
+                {userProfile?.topics?.length > 0
+                  ? "No courses available for your selected topics yet"
+                  : "You haven't selected any topics in your profile"}
+              </Typography>
+              <CustomButton to="/complete-profile">
+                {userProfile?.topics?.length > 0
+                  ? "Browse All Courses"
+                  : "Complete Your Profile"}
+              </CustomButton>
+            </Box>
+          )}
 
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            mt: 5,
-          }}
-        >
-          <CustomButton to={"/courses"}>View All Courses</CustomButton>
-        </Box>
-
-        <Dialog
-          open={open}
-          onClose={handleClose}
-          fullWidth
-          maxWidth="sm"
-          PaperProps={{
-            sx: {
-              backgroundColor: "#1e1e1e",
-              color: "#ffffff",
-              borderRadius: 2,
-            },
-          }}
-        >
-          <DialogTitle
+          <Box
             sx={{
-              color: "#00ADB5",
-              fontWeight: "bold",
-              fontSize: "1.5rem",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              mt: 5,
             }}
           >
-            Add New Course
-          </DialogTitle>
+            <CustomButton to={"/courses"}>View All Courses</CustomButton>
+          </Box>
 
-          <DialogContent>
-            <Typography sx={{ color: "#ffffff", mb: 1 }}>
-              Select Topics
-            </Typography>
+          <Dialog
+            open={open}
+            onClose={handleClose}
+            fullWidth
+            maxWidth="sm"
+            PaperProps={{
+              sx: {
+                backgroundColor: "background.paper",
+                color: "text.primary",
+                borderRadius: 2,
+              },
+            }}
+          >
+            <DialogTitle
+              sx={{
+                color: "primary.main",
+                fontWeight: "bold",
+                fontSize: "1.5rem",
+              }}
+            >
+              Add New Course
+            </DialogTitle>
 
-            <Autocomplete
-              multiple
-              options={options}
-              value={selectedOptions}
-              onChange={(event, newValue) => setSelectedOptions(newValue)}
-              renderTags={(value, getTagProps) =>
-                value.map((option, index) => (
-                  <Chip
-                    variant="outlined"
-                    label={option}
-                    {...getTagProps({ index })}
-                    key={option}
-                    sx={{
-                      backgroundColor: "transparent",
-                      color: "#fff",
-                      borderColor: "#00ADB5",
-                    }}
+            <DialogContent>
+              <Typography variant="body1" sx={{ mb: 2 }}>
+                Your academic year: <strong>Year {userProfile?.year}</strong>
+              </Typography>
+
+              <Autocomplete
+                multiple
+                options={
+                  userProfile?.year ? topicsByYear[userProfile.year] || [] : []
+                }
+                value={courseData.topics}
+                onChange={(event, newValue) => {
+                  const limitedValues = newValue.slice(0, 3);
+                  setCourseData({ ...courseData, topics: limitedValues });
+                }}
+                renderTags={(value, getTagProps) =>
+                  value.map((option, index) => (
+                    <Chip
+                      variant="outlined"
+                      label={option}
+                      {...getTagProps({ index })}
+                      key={option}
+                      sx={{
+                        backgroundColor: "transparent",
+                        color: "text.primary",
+                        borderColor: "primary.main",
+                      }}
+                    />
+                  ))
+                }
+                renderInput={(params) => (
+                  <CustomTextField
+                    {...params}
+                    label="Select Topics (Max 3)"
+                    placeholder="Start typing..."
                   />
-                ))
-              }
-              renderInput={(params) => (
-                <CustomTextField
-                  {...params}
-                  label="Search Topics"
-                  placeholder="Start typing..."
-                />
-              )}
-              sx={{ mt: 1 }}
-            />
-          </DialogContent>
+                )}
+                sx={{ mt: 1 }}
+              />
+            </DialogContent>
 
-          <DialogActions sx={{ justifyContent: "space-between", px: 3, pb: 2 }}>
-            <Button onClick={handleClose} color="error" variant="outlined">
-              Cancel
-            </Button>
-            <CustomButton onClick={handleAddCourse}>Add</CustomButton>
-          </DialogActions>
-        </Dialog>
-      </Container>
-    </Box>
+            <DialogActions
+              sx={{ justifyContent: "space-between", px: 3, pb: 2 }}
+            >
+              <Button onClick={handleClose} color="error" variant="outlined">
+                Cancel
+              </Button>
+              <CustomButton
+                onClick={handleAddCourse}
+                disabled={courseData.topics.length === 0 || isAdding}
+              >
+                {isAdding ? (
+                  <>
+                    <CircularProgress size={20} sx={{ mr: 1 }} />
+                    Adding...
+                  </>
+                ) : (
+                  "Add Courses"
+                )}
+              </CustomButton>
+            </DialogActions>
+          </Dialog>
+        </Container>
+      </Box>
+    </ThemeProvider>
   );
 };
 

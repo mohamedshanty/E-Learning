@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext } from "react";
 import {
   Box,
   Container,
@@ -8,14 +8,13 @@ import {
   CardContent,
   CardActions,
   Button,
-  Chip,
   Stack,
 } from "@mui/material";
 import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
 import OndemandVideoIcon from "@mui/icons-material/OndemandVideo";
 import LinkIcon from "@mui/icons-material/Link";
-import { resourcesData } from "../../data/resourcesData";
 import CustomButton from "../CustomButton/CustomButton";
+import { ResourcesContext } from "../../context/ResourcesContext ";
 
 const typeIcons = {
   PDF: <PictureAsPdfIcon />,
@@ -24,12 +23,9 @@ const typeIcons = {
 };
 
 const ResourcesSection = () => {
-  const [filter] = useState("All");
+  const { resources } = useContext(ResourcesContext);
 
-  const filteredResources =
-    filter === "All"
-      ? resourcesData
-      : resourcesData.filter((res) => res.type === filter);
+  const latestResources = resources.slice(0, 3);
 
   return (
     <Box
@@ -48,7 +44,7 @@ const ResourcesSection = () => {
         </Typography>
 
         <Grid container spacing={4}>
-          {filteredResources.slice(0, 3).map((res) => (
+          {latestResources.map((res) => (
             <Grid size={{ xs: 12, sm: 6, md: 4 }} key={res.id}>
               <Card
                 sx={{
@@ -79,7 +75,7 @@ const ResourcesSection = () => {
                 <CardActions>
                   <Button
                     size="small"
-                    href={res.link}
+                    href={res.url}
                     target="_blank"
                     rel="noopener"
                     sx={{ color: "#00ADB5" }}
@@ -91,14 +87,9 @@ const ResourcesSection = () => {
             </Grid>
           ))}
         </Grid>
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "center",
-            mt: 5,
-          }}
-        >
-          <CustomButton to={"/resources"}>View All resources</CustomButton>
+
+        <Box sx={{ display: "flex", justifyContent: "center", mt: 5 }}>
+          <CustomButton to="/resources">View All resources</CustomButton>
         </Box>
       </Container>
     </Box>
