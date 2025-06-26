@@ -45,8 +45,16 @@ const AdminResources = () => {
   };
 
   return (
-    <Container maxWidth="sm" sx={{ py: 10 }}>
-      <Paper elevation={3} sx={{ p: 4 }}>
+    <Container maxWidth="md" sx={{ py: { xs: 4, md: 10 } }}>
+      <Paper
+        elevation={3}
+        sx={{
+          p: { xs: 2, sm: 4 },
+          mx: "auto",
+          maxWidth: 600,
+          width: "100%",
+        }}
+      >
         <Typography variant="h5" mb={3} color="primary">
           Add New Resource
         </Typography>

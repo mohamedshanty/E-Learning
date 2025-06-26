@@ -40,12 +40,11 @@ import { nanoid } from "nanoid";
 import { CloudUpload, Edit, Delete } from "@mui/icons-material";
 
 const topicsByYear = {
-  1: ["HTML", "CSS"],
-  2: ["HTML", "CSS", "JavaScript", "Git and Github"],
-  3: ["React", "Redux", "TypeScript"],
-  4: ["Node.js", "Express", "MongoDB"],
-  5: ["Advanced JS", "Testing", "Performance"],
-  6: ["Project", "Deployment", "CI/CD"],
+  1: ["HTML", "CSS", "JavaScript", "Git and Github"],
+  2: ["React", "Redux", "TypeScript"],
+  3: ["Node.js", "Express", "MongoDB"],
+  4: ["Advanced JS", "Testing", "Performance"],
+  5: ["Project", "Deployment", "CI/CD"],
 };
 
 const AdminCourses = () => {
@@ -490,9 +489,6 @@ const AdminCourses = () => {
                 </MenuItem>
                 <MenuItem value="5" sx={{ color: "#000" }}>
                   Fifth Year
-                </MenuItem>
-                <MenuItem value="6" sx={{ color: "#000" }}>
-                  Sixth Year
                 </MenuItem>
               </Select>
             </FormControl>

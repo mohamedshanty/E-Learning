@@ -26,6 +26,8 @@ import AdminResources from "./components/adminResources/AdminResources";
 import ProtectedRoute from "./components/routes/ProtectedRoute";
 import AuthProvider from "./context/AuthContext";
 import { ResourcesProvider } from "./context/ResourcesContext ";
+import ForgetPassword from "./components/forgetPassword/ForgetPassword";
+import ResetPassword from "./components/resetPassword/ResetPassword";
 
 const App = () => {
   return (
@@ -37,13 +39,12 @@ const App = () => {
             <ResourcesProvider>
               <ScrollToTop />
               <Routes>
-                {/* إعادة توجيه من "/" إلى صفحة تسجيل الدخول */}
                 <Route path="/" element={<Navigate to="/login" replace />} />
 
-                {/* صفحة تسجيل الدخول بدون حماية */}
                 <Route path="/login" element={<Login />} />
+                <Route path="/forget-password" element={<ForgetPassword />} />
+                <Route path="/reset" element={<ResetPassword />} />
 
-                {/* جميع الصفحات محمية */}
                 <Route
                   path="/profile"
                   element={

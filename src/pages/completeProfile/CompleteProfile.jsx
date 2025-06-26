@@ -49,12 +49,11 @@ const theme = createTheme({
 });
 
 const topicsByYear = {
-  1: ["HTML", "CSS"],
-  2: ["HTML", "CSS", "JavaScript", "Git and Github"],
-  3: ["React", "Redux", "TypeScript"],
-  4: ["Node.js", "Express", "MongoDB"],
-  5: ["Advanced JS", "Testing", "Performance"],
-  6: ["Project", "Deployment", "CI/CD"],
+  1: ["HTML", "CSS", "JavaScript", "Git and GitHub"],
+  2: ["React", "Redux", "TypeScript"],
+  3: ["Node.js", "Express", "MongoDB"],
+  4: ["Advanced JS", "Testing", "Performance"],
+  5: ["Project", "Deployment", "CI/CD"],
 };
 
 const CompleteProfile = () => {
@@ -287,7 +286,6 @@ const CompleteProfile = () => {
                     <MenuItem value="3">Third Year</MenuItem>
                     <MenuItem value="4">Fourth Year</MenuItem>
                     <MenuItem value="5">Fifth Year</MenuItem>
-                    <MenuItem value="6">Sixth Year</MenuItem>
                   </Select>
                 </FormControl>
 
@@ -361,8 +359,10 @@ const CompleteProfile = () => {
                   style={{
                     maxWidth: "300px",
                     borderRadius: "16px",
+                    objectFit: "cover",
+                    aspectRatio: "1 / 1",
                   }}
-                  src={assets.profile_complete_illustration}
+                  src={preview || assets.profile_complete_illustration}
                   alt="Profile Completion"
                 />
               </Box>

@@ -216,7 +216,7 @@ const Login = () => {
 
             {currState === "Login" && (
               <Link
-                to="/forget"
+                to="/forget-password"
                 style={{
                   color: "#90caf9",
                   cursor: "pointer",

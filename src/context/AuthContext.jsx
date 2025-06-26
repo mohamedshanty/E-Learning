@@ -18,7 +18,7 @@ const AuthProvider = ({ children }) => {
           setCurrentUser({
             uid: user.uid,
             email: user.email,
-            ...userDocSnap.data(),
+            ...userDocSnap.data(), // ⬅️ يحتوي على isSuperAdmin
           });
         } else {
           setCurrentUser({ uid: user.uid, email: user.email });

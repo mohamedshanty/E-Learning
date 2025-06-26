@@ -1,14 +1,15 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Box, Typography, Avatar, Paper, Card, Divider } from "@mui/material";
 import CustomButton from "../../components/CustomButton/CustomButton";
-import { CoursesContext } from "../../context/CoursesContext";
 import { db } from "../../config/firebase";
 import { doc, getDoc } from "firebase/firestore";
 import assets from "../../assets/assets";
 
 const Profile = () => {
   const [userData, setUserData] = useState(null);
-  const { getCompletedCount } = useContext(CoursesContext);
+  const [coursesCount, setCoursesCount] = useState(0);
+  const [completedVideos, setCompletedVideos] = useState(0);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -16,29 +17,68 @@ const Profile = () => {
       if (!uid) return;
 
       try {
-        const userRef = doc(db, "users", uid);
-        const profileRef = doc(db, "profiles", uid);
-
-        const [userSnap, profileSnap] = await Promise.all([
-          getDoc(userRef),
-          getDoc(profileRef),
+        setLoading(true);
+        const [userDoc, profileDoc, progressDoc] = await Promise.all([
+          getDoc(doc(db, "users", uid)),
+          getDoc(doc(db, "profiles", uid)),
+          getDoc(doc(db, "userProgress", uid)),
         ]);
 
-        if (userSnap.exists() && profileSnap.exists()) {
-          setUserData({
-            ...userSnap.data(),
-            ...profileSnap.data(),
-          });
+        const mergedData = {};
+
+        if (userDoc.exists()) {
+          Object.assign(mergedData, userDoc.data());
+          setCoursesCount(mergedData.enrolledCourses?.length || 0);
+        }
+
+        if (profileDoc.exists()) {
+          Object.assign(mergedData, profileDoc.data());
+        }
+
+        setUserData(mergedData);
+
+        if (progressDoc.exists()) {
+          const progressData = progressDoc.data();
+          const totalCompleted = Object.values(progressData).reduce(
+            (total, course) => total + (course.completedLectures?.length || 0),
+            0
+          );
+          setCompletedVideos(totalCompleted);
         }
       } catch (error) {
         console.error("Error fetching profile:", error);
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchUserData();
   }, []);
 
-  if (!userData) {
+  const getAvatarSrc = () => {
+    if (!userData) return assets.avatar_icon;
+
+    // تحقق من وجود الصورة في profile.imageUrl أولاً
+    if (userData.imageUrl && isValidImageUrl(userData.imageUrl)) {
+      return userData.imageUrl;
+    }
+
+    // ثم تحقق من وجودها في user.avatar (إذا كان موجوداً)
+    if (userData.avatar && isValidImageUrl(userData.avatar)) {
+      return userData.avatar;
+    }
+
+    return assets.avatar_icon;
+  };
+
+  const isValidImageUrl = (url) => {
+    return (
+      typeof url === "string" &&
+      (url.startsWith("http") || url.startsWith("data:") || url.startsWith("/"))
+    );
+  };
+
+  if (loading) {
     return (
       <Box
         sx={{
@@ -79,21 +119,27 @@ const Profile = () => {
       >
         <Box display="flex" alignItems="center" gap={4} flexWrap="wrap">
           <Avatar
-            src={userData.imageUrl || assets.avatar_icon}
+            src={getAvatarSrc()}
             sx={{
               width: 100,
               height: 100,
               border: "2px solid #2c5364",
             }}
+            alt="User Avatar"
+            onError={(e) => {
+              e.target.src = assets.avatar_icon;
+            }}
           />
           <Box>
-            <Typography variant="h5">{userData.fullName || "User"}</Typography>
+            <Typography variant="h5">{userData?.fullName || "User"}</Typography>
             <Typography variant="body2" color="gray">
-              {userData.email}
+              {userData?.email}
             </Typography>
-            <Typography variant="body2">Phone: {userData.phone}</Typography>
             <Typography variant="body2">
-              Academic Year: {userData.year}
+              Phone: {userData?.phone || "Not provided"}
+            </Typography>
+            <Typography variant="body2">
+              Role: {userData?.role || "Student"}
             </Typography>
           </Box>
         </Box>
@@ -102,17 +148,17 @@ const Profile = () => {
 
         <Box display="flex" gap={2} flexWrap="wrap">
           <Card sx={{ p: 2, flex: 1, backgroundColor: "#222", color: "white" }}>
-            <Typography>Courses Enrolled</Typography>
-            <Typography variant="h6">6</Typography>
+            <Typography variant="subtitle1">Courses Enrolled</Typography>
+            <Typography variant="h6">{coursesCount}</Typography>
           </Card>
           <Card sx={{ p: 2, flex: 1, backgroundColor: "#222", color: "white" }}>
-            <Typography>Videos Completed</Typography>
-            <Typography variant="h6">{getCompletedCount()}</Typography>
+            <Typography variant="subtitle1">Videos Completed</Typography>
+            <Typography variant="h6">{completedVideos}</Typography>
           </Card>
         </Box>
 
         <Box sx={{ mt: 2 }}>
-          <CustomButton variant="outlined" to="/complete-profile">
+          <CustomButton variant="outlined" to="/profile">
             Edit Profile
           </CustomButton>
         </Box>

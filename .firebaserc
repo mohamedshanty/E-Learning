@@ -1,5 +1,8 @@
 {
   "projects": {
-    "default": "chat-app-e55f8"
-  }
+    "default": "e-learning-9fecf",
+    "e-learning": "e-learning-9fecf"
+  },
+  "targets": {},
+  "etags": {}
 }

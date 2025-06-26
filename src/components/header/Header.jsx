@@ -96,15 +96,15 @@ const Header = () => {
   }, []);
 
   const handleMenu = (event) => setAnchorEl(event.currentTarget);
-  const handleCloseMenu = () => setAnchorEl(null);
+  const handleClose = () => setAnchorEl(null);
 
   const handleProfile = () => {
-    handleCloseMenu();
+    handleClose();
     navigate("/profile-page");
   };
 
   const handleLogout = () => {
-    handleCloseMenu();
+    handleClose();
     localStorage.clear();
     setUserData(null);
     setIsLoggedIn(false);
@@ -175,6 +175,7 @@ const Header = () => {
             <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
               {isLoggedIn && userData ? (
                 <>
+                  {/* زر Dashboard يظهر فقط على md وأكبر */}
                   {userData.role === "admin" && (
                     <Button
                       variant="outlined"
@@ -187,6 +188,7 @@ const Header = () => {
                         minWidth: "80px",
                         color: "#00ADB5",
                         borderColor: "#00ADB5",
+                        display: { xs: "none", md: "inline-flex" }, // هنا تم تعديل الdisplay
                         "&:hover": {
                           borderColor: "#008C9E",
                           backgroundColor: "rgba(0, 173, 181, 0.1)",
@@ -223,21 +225,29 @@ const Header = () => {
                   <Menu
                     anchorEl={anchorEl}
                     open={Boolean(anchorEl)}
-                    onClose={handleCloseMenu}
-                    anchorOrigin={{
-                      vertical: "bottom",
-                      horizontal: "right",
-                    }}
-                    transformOrigin={{
-                      vertical: "top",
-                      horizontal: "right",
+                    onClose={handleClose}
+                    PaperProps={{
+                      sx: {
+                        backgroundColor: "#1e1e1e",
+                        color: "#EEEEEE",
+                        border: "1px solid #393E46",
+                        "& .MuiMenuItem-root": {
+                          "&:hover": {
+                            backgroundColor: "rgba(0, 173, 181, 0.1)",
+                          },
+                        },
+                      },
                     }}
                   >
                     <MenuItem onClick={handleProfile}>
-                      <AccountCircle sx={{ mr: 1 }} /> Profile
+                      <AccountCircle sx={{ mr: 1, color: "#00ADB5" }} />
+                      Profile
                     </MenuItem>
                     <MenuItem onClick={handleLogout}>
-                      <Logout sx={{ mr: 1 }} /> Logout
+                      <Logout sx={{ mr: 1, color: "#FF5252" }} />
+                      <Box component="span" sx={{ color: "#FF5252" }}>
+                        Logout
+                      </Box>
                     </MenuItem>
                   </Menu>
                 </>
@@ -255,7 +265,12 @@ const Header = () => {
         </Container>
       </AppBar>
 
-      <Drawer anchor="right" open={drawerOpen} onClose={toggleDrawer(false)}>
+      <Drawer
+        anchor="right"
+        open={drawerOpen}
+        onClose={toggleDrawer(false)}
+        sx={{ zIndex: 12000 }}
+      >
         <Box
           sx={{
             width: 250,
@@ -279,6 +294,19 @@ const Header = () => {
                 <ListItemText primary={item.label} />
               </ListItem>
             ))}
+
+            {/* Dashboard في القائمة الجانبية للادمن فقط */}
+            {userData?.role === "admin" && (
+              <ListItem
+                button
+                onClick={() => {
+                  navigate("/dashboard");
+                  setDrawerOpen(false);
+                }}
+              >
+                <ListItemText primary="Dashboard" />
+              </ListItem>
+            )}
           </List>
         </Box>
       </Drawer>

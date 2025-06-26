@@ -2,19 +2,18 @@ import React from "react";
 import {
   Box,
   Typography,
-  Button,
   Stack,
   useMediaQuery,
   Container,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
+import { motion } from "framer-motion";
 import assets from "../../assets/assets";
 import CustomButton from "../CustomButton/CustomButton";
 
 const Hero = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
-
   const primaryColor = "#00ADB5";
 
   return (
@@ -23,8 +22,10 @@ const Hero = () => {
         minHeight: "100vh",
         background: "linear-gradient(to bottom, #0A0A0A, #101624)",
         color: "white",
-        py: { xs: 5, md: 0 },
+        overflow: "hidden",
+        position: "relative",
       }}
+      id="home"
     >
       <Container maxWidth="lg">
         <Box
@@ -34,9 +35,16 @@ const Hero = () => {
             flexDirection: isMobile ? "column" : "row",
             justifyContent: "space-between",
             pt: 18,
+            pb: 10,
           }}
         >
-          <Box sx={{ maxWidth: { xs: "100%", md: 400 } }}>
+          <motion.div
+            initial={{ opacity: 0, x: -50 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
+            viewport={{ once: true }}
+            style={{ maxWidth: isMobile ? "100%" : 400 }}
+          >
             <Typography
               variant="h3"
               sx={{ fontWeight: "bold", color: primaryColor, mb: 2 }}
@@ -47,6 +55,7 @@ const Hero = () => {
               Join thousands of learners and unlock your potential with our
               expert-led online courses tailored just for you.
             </Typography>
+
             <Stack
               direction={isMobile ? "column" : "row"}
               spacing={2}
@@ -62,17 +71,19 @@ const Hero = () => {
                 Get Started
               </CustomButton>
             </Stack>
-          </Box>
+          </motion.div>
 
-          <Box
-            component="img"
+          <motion.img
             src={assets.hero1}
             alt="Hero"
-            sx={{
+            initial={{ opacity: 0, y: 50 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.9 }}
+            viewport={{ once: true }}
+            style={{
               maxWidth: 500,
               width: "100%",
-              mt: isMobile ? 5 : 0,
-              background: "transparent",
+              marginTop: isMobile ? "3rem" : 0,
             }}
           />
         </Box>

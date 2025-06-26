@@ -9,18 +9,22 @@ import {
   Avatar,
   Box,
   Button,
+  useMediaQuery,
 } from "@mui/material";
 import { Menu as MenuIcon, AccountCircle, Logout } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../../config/firebase";
 import assets from "../../assets/assets";
+import { useTheme } from "@mui/material/styles";
 
 const AdminHeader = ({ onMenuClick }) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [userData, setUserData] = useState(null);
   const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem("uid"));
 
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -116,24 +120,26 @@ const AdminHeader = ({ onMenuClick }) => {
 
         {isLoggedIn && userData && (
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-            <Button
-              variant="outlined"
-              size="small"
-              onClick={() => navigate("/home")}
-              sx={{
-                mr: 2,
-                fontSize: "0.75rem",
-                padding: "6px 12px",
-                color: "#00ADB5",
-                borderColor: "#393E46",
-                "&:hover": {
-                  borderColor: "#00ADB5",
-                  backgroundColor: "rgba(0, 173, 181, 0.1)",
-                },
-              }}
-            >
-              View Site
-            </Button>
+            {!isMobile && (
+              <Button
+                variant="outlined"
+                size="small"
+                onClick={() => navigate("/home")}
+                sx={{
+                  mr: 2,
+                  fontSize: "0.75rem",
+                  padding: "6px 12px",
+                  color: "#00ADB5",
+                  borderColor: "#393E46",
+                  "&:hover": {
+                    borderColor: "#00ADB5",
+                    backgroundColor: "rgba(0, 173, 181, 0.1)",
+                  },
+                }}
+              >
+                View Site
+              </Button>
+            )}
 
             <IconButton
               onClick={handleMenu}

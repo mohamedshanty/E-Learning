@@ -41,7 +41,6 @@ const AdminBlogUpload = () => {
     tags: [],
     image: null,
     imageUrl: "",
-    readTime: "5 min",
   });
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ text: "", type: "" });
@@ -50,14 +49,7 @@ const AdminBlogUpload = () => {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [currentBlogId, setCurrentBlogId] = useState(null);
 
-  const categories = [
-    "Technology",
-    "Education",
-    "Science",
-    "Health",
-    "Business",
-  ];
-  const tagOptions = ["React", "Firebase", "MUI", "JavaScript", "CSS", "HTML"];
+  const categories = ["Technology", "Education", "Science", "Business"];
 
   useEffect(() => {
     const fetchBlogs = async () => {
@@ -105,7 +97,6 @@ const AdminBlogUpload = () => {
       tags: blog.tags || [],
       image: null,
       imageUrl: blog.image || "",
-      readTime: blog.readTime || "5 min",
     });
     setEditMode(true);
   };
@@ -120,7 +111,6 @@ const AdminBlogUpload = () => {
       tags: [],
       image: null,
       imageUrl: "",
-      readTime: "5 min",
     });
     setEditMode(false);
   };
@@ -143,7 +133,6 @@ const AdminBlogUpload = () => {
         category: form.category,
         tags: form.tags,
         image: imageUrl,
-        readTime: form.readTime,
         date: new Date().toISOString().split("T")[0],
         updatedAt: Timestamp.now(),
       };
@@ -331,59 +320,6 @@ const AdminBlogUpload = () => {
                 ))}
               </Select>
             </FormControl>
-
-            <FormControl fullWidth margin="normal" sx={{ color: "#EEEEEE" }}>
-              <InputLabel sx={{ color: "#AAAAAA" }}>Tags</InputLabel>
-              <Select
-                multiple
-                name="tags"
-                value={form.tags}
-                onChange={handleTagChange}
-                label="Tags"
-                sx={{
-                  color: "#EEEEEE",
-                  "& .MuiOutlinedInput-notchedOutline": {
-                    borderColor: "#333",
-                  },
-                  "&:hover .MuiOutlinedInput-notchedOutline": {
-                    borderColor: "#00ADB5",
-                  },
-                  "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                    borderColor: "#00ADB5",
-                  },
-                }}
-              >
-                {tagOptions.map((tag) => (
-                  <MenuItem key={tag} value={tag} sx={{ color: "#000" }}>
-                    {tag}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-
-            <TextField
-              label="Read Time"
-              name="readTime"
-              fullWidth
-              margin="normal"
-              value={form.readTime}
-              onChange={handleChange}
-              InputLabelProps={{ style: { color: "#AAAAAA" } }}
-              sx={{
-                input: { color: "#EEEEEE" },
-                "& .MuiOutlinedInput-root": {
-                  "& fieldset": {
-                    borderColor: "#333",
-                  },
-                  "&:hover fieldset": {
-                    borderColor: "#00ADB5",
-                  },
-                  "&.Mui-focused fieldset": {
-                    borderColor: "#00ADB5",
-                  },
-                },
-              }}
-            />
 
             <Box sx={{ mt: 2, mb: 3 }}>
               <Button

@@ -9,28 +9,45 @@ import {
   ListItemText,
 } from "@mui/material";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import { motion } from "framer-motion";
 import assets from "../../assets/assets";
+
+const listItems = [
+  "Track your progress easily",
+  "Save and organize your lectures",
+  "Access external resources and summaries",
+  "Built for university students",
+];
 
 const AboutSection = () => {
   return (
     <Box
+      id="about"
       sx={{
-        background: "linear-gradient(to bottom, #101624,#0A0A0A )",
-        py: 10,
-        mt: -2,
+        background: "linear-gradient(to bottom, #101624, #0A0A0A)",
+        position: "relative",
+        py: 12,
+        mt: "-2px",
+        overflow: "hidden",
       }}
     >
-      <Container maxWidth="lg">
+      <Container maxWidth="lg" sx={{ position: "relative", zIndex: 2 }}>
         <Box
           sx={{
             display: "flex",
             flexDirection: { xs: "column", md: "row" },
             alignItems: "center",
-            gap: 5,
+            gap: 6,
           }}
         >
-          {/* Left column */}
-          <Box sx={{ flex: 1 }}>
+          {/* Left Column */}
+          <motion.div
+            initial={{ opacity: 0, x: -40 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.7 }}
+            viewport={{ once: true }}
+            style={{ flex: 1 }}
+          >
             <Typography
               variant="h4"
               sx={{ color: "#00ADB5", fontWeight: "bold", mb: 2 }}
@@ -45,32 +62,35 @@ const AboutSection = () => {
             </Typography>
 
             <List>
-              {[
-                "Track your progress easily",
-                "Save and organize your lectures",
-                "Access external resources and summaries",
-                "Built for university students",
-              ].map((text, i) => (
-                <ListItem key={i} disablePadding>
-                  <ListItemIcon>
-                    <CheckCircleIcon sx={{ color: "#00ADB5" }} />
-                  </ListItemIcon>
-                  <ListItemText
-                    primary={text}
-                    primaryTypographyProps={{ sx: { color: "white" } }}
-                  />
-                </ListItem>
+              {listItems.map((text, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, x: -20 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.4, delay: i * 0.2 }}
+                  viewport={{ once: true }}
+                >
+                  <ListItem disablePadding>
+                    <ListItemIcon>
+                      <CheckCircleIcon sx={{ color: "#00ADB5" }} />
+                    </ListItemIcon>
+                    <ListItemText
+                      primary={text}
+                      primaryTypographyProps={{ sx: { color: "white" } }}
+                    />
+                  </ListItem>
+                </motion.div>
               ))}
             </List>
-          </Box>
+          </motion.div>
 
-          {/* Right column */}
-          <Box
-            sx={{
-              flex: 1,
-              display: "flex",
-              justifyContent: "center",
-            }}
+          {/* Right Column */}
+          <motion.div
+            initial={{ opacity: 0, y: 50 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true }}
+            style={{ flex: 1, display: "flex", justifyContent: "center" }}
           >
             <Box
               component="img"
@@ -80,9 +100,10 @@ const AboutSection = () => {
                 width: "100%",
                 maxWidth: 500,
                 display: "block",
+                borderRadius: 2,
               }}
             />
-          </Box>
+          </motion.div>
         </Box>
       </Container>
     </Box>

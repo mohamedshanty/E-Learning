@@ -3,8 +3,6 @@ import {
   Box,
   Container,
   Typography,
-  TextField,
-  Button,
   Stack,
   useMediaQuery,
   useTheme,
@@ -13,6 +11,20 @@ import toast from "react-hot-toast";
 import assets from "../../assets/assets";
 import CustomButton from "../CustomButton/CustomButton";
 import CustomTextField from "../customTextField/CustomTextField";
+import { motion } from "framer-motion";
+
+const fadeInUp = {
+  hidden: { opacity: 0, y: 30 },
+  visible: (i = 1) => ({
+    opacity: 1,
+    y: 0,
+    transition: {
+      delay: i * 0.2,
+      duration: 0.6,
+      ease: "easeOut",
+    },
+  }),
+};
 
 const ContactSection = () => {
   const theme = useTheme();
@@ -41,17 +53,26 @@ const ContactSection = () => {
       }}
     >
       <Container maxWidth="lg">
-        <Typography
-          variant="h4"
-          sx={{
-            color: "#00ADB5",
-            fontWeight: "bold",
-            mb: 6,
-            textAlign: "center",
-          }}
+        <motion.div
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+          variants={fadeInUp}
+          custom={0}
         >
-          Contact Us
-        </Typography>
+          <Typography
+            variant="h4"
+            sx={{
+              color: "#00ADB5",
+              fontWeight: "bold",
+              mb: 6,
+              textAlign: "center",
+            }}
+          >
+            Contact Us
+          </Typography>
+        </motion.div>
+
         <Box
           sx={{
             display: "flex",
@@ -62,11 +83,13 @@ const ContactSection = () => {
           }}
         >
           {/* Left side: Image + motivational message */}
-          <Box
-            sx={{
-              flex: 1,
-              textAlign: isMobile ? "center" : "left",
-            }}
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={fadeInUp}
+            custom={1}
+            style={{ flex: 1, textAlign: isMobile ? "center" : "left" }}
           >
             <Box
               component="img"
@@ -89,60 +112,64 @@ const ContactSection = () => {
               Your success is our priority — just send us a message and we'll
               respond promptly!
             </Typography>
-          </Box>
+          </motion.div>
 
           {/* Right side: Form */}
-          <Box
-            component="form"
-            onSubmit={handleSubmit}
-            sx={{
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={fadeInUp}
+            custom={2}
+            style={{
               flex: 1,
-              backgroundColor: "#1e1e1e",
-              borderRadius: 2,
-              py: 4,
-              px: { xs: 2, md: 4 },
               maxWidth: 600,
               width: "100%",
             }}
           >
-            <Stack spacing={3} sx={{ width: "100%" }}>
-              <CustomTextField
-                label="Full Name"
-                name="name"
-                value={form.name}
-                onChange={handleChange}
-                sx={{ backgroundColor: "#2a2a2a" }}
-                required
-              />
-              <CustomTextField
-                label="Email"
-                name="email"
-                value={form.email}
-                onChange={handleChange}
-                sx={{ backgroundColor: "#2a2a2a" }}
-                required
-              />
-              <CustomTextField
-                label="Message"
-                name="message"
-                value={form.message}
-                onChange={handleChange}
-                sx={{ backgroundColor: "#2a2a2a" }}
-                required
-                multiline
-                rows={4}
-              />
+            <Box
+              component="form"
+              onSubmit={handleSubmit}
+              sx={{
+                backgroundColor: "#1e1e1e",
+                borderRadius: 2,
+                py: 4,
+                px: { xs: 2, md: 4 },
+                width: "100%",
+              }}
+            >
+              <Stack spacing={3} sx={{ width: "100%" }}>
+                <CustomTextField
+                  label="Full Name"
+                  name="name"
+                  value={form.name}
+                  onChange={handleChange}
+                  sx={{ backgroundColor: "#2a2a2a" }}
+                  required
+                />
+                <CustomTextField
+                  label="Email"
+                  name="email"
+                  value={form.email}
+                  onChange={handleChange}
+                  sx={{ backgroundColor: "#2a2a2a" }}
+                  required
+                />
+                <CustomTextField
+                  label="Message"
+                  name="message"
+                  value={form.message}
+                  onChange={handleChange}
+                  sx={{ backgroundColor: "#2a2a2a" }}
+                  required
+                  multiline
+                  rows={4}
+                />
 
-              <CustomButton
-                type="submit"
-                // onClick={
-                //   // toast.success("Your message has been sent successfully!")
-                // }
-              >
-                Send Message
-              </CustomButton>
-            </Stack>
-          </Box>
+                <CustomButton type="submit">Send Message</CustomButton>
+              </Stack>
+            </Box>
+          </motion.div>
         </Box>
       </Container>
     </Box>

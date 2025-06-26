@@ -118,7 +118,7 @@ const Welcome = () => {
               mb: 1,
             }}
           >
-            👋 {getGreeting()}, Admin
+            {getGreeting()}, Admin
           </Typography>
           <Typography
             variant="subtitle1"

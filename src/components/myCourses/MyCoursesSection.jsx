@@ -44,6 +44,15 @@ import {
 } from "firebase/firestore";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 import RefreshIcon from "@mui/icons-material/Refresh";
+import { motion, AnimatePresence } from "framer-motion";
+
+// Framer Motion components
+const MotionCard = motion(Card);
+const MotionGrid = motion(Grid);
+const MotionButton = motion(Button);
+const MotionIconButton = motion(IconButton);
+const MotionTypography = motion(Typography);
+const MotionBox = motion(Box);
 
 const theme = createTheme({
   palette: {
@@ -205,7 +214,9 @@ const MyCoursesSection = () => {
   if (error) {
     return (
       <ThemeProvider theme={theme}>
-        <Box
+        <MotionBox
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
           sx={{
             background: "linear-gradient(to bottom, #0A0A0A, #101624)",
             display: "flex",
@@ -216,22 +227,35 @@ const MyCoursesSection = () => {
           }}
         >
           <ErrorOutlineIcon color="error" sx={{ fontSize: 60, mb: 2 }} />
-          <Typography variant="h5" color="error" gutterBottom>
+          <MotionTypography
+            variant="h5"
+            color="error"
+            gutterBottom
+            initial={{ y: -20 }}
+            animate={{ y: 0 }}
+          >
             Failed to load courses
-          </Typography>
-          <Typography color="text.secondary" sx={{ mb: 3 }}>
+          </MotionTypography>
+          <MotionTypography
+            color="text.secondary"
+            sx={{ mb: 3 }}
+            initial={{ y: 20 }}
+            animate={{ y: 0 }}
+          >
             {error.message || "Please check your connection and try again"}
-          </Typography>
-          <Button
+          </MotionTypography>
+          <MotionButton
             variant="contained"
             color="primary"
             onClick={handleRefresh}
             startIcon={<RefreshIcon />}
             disabled={isRefreshing}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
           >
             {isRefreshing ? "Refreshing..." : "Retry"}
-          </Button>
-        </Box>
+          </MotionButton>
+        </MotionBox>
       </ThemeProvider>
     );
   }
@@ -246,7 +270,10 @@ const MyCoursesSection = () => {
         }}
       >
         <Container maxWidth="lg">
-          <Box
+          <MotionBox
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
             sx={{
               display: "flex",
               justifyContent: "space-between",
@@ -256,7 +283,7 @@ const MyCoursesSection = () => {
               mb: 4,
             }}
           >
-            <Typography
+            <MotionTypography
               variant="h4"
               sx={{
                 color: "primary.main",
@@ -265,17 +292,19 @@ const MyCoursesSection = () => {
               }}
             >
               My Courses
-            </Typography>
+            </MotionTypography>
 
             <Box sx={{ display: "flex", gap: 2 }}>
               <Tooltip title="Refresh courses">
-                <IconButton
+                <MotionIconButton
                   onClick={handleRefresh}
                   color="primary"
                   disabled={isRefreshing}
+                  whileHover={{ rotate: 90 }}
+                  whileTap={{ scale: 0.9 }}
                 >
                   <RefreshIcon />
-                </IconButton>
+                </MotionIconButton>
               </Tooltip>
               <CustomButton
                 startIcon={<AddIcon />}
@@ -289,12 +318,16 @@ const MyCoursesSection = () => {
                 Add Course
               </CustomButton>
             </Box>
-          </Box>
+          </MotionBox>
 
           {isRefreshing && (
-            <Box sx={{ display: "flex", justifyContent: "center", my: 4 }}>
+            <MotionBox
+              sx={{ display: "flex", justifyContent: "center", my: 4 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+            >
               <CircularProgress color="primary" />
-            </Box>
+            </MotionBox>
           )}
 
           {loading ? (
@@ -314,124 +347,146 @@ const MyCoursesSection = () => {
             </Grid>
           ) : filteredCourses.length > 0 ? (
             <Grid container spacing={4}>
-              {filteredCourses.map((course) => (
-                <Grid size={{ xs: 12, sm: 6, md: 4 }} key={course.id}>
-                  <Card
-                    sx={{
-                      backgroundColor: "background.paper",
-                      height: "100%",
-                      display: "flex",
-                      flexDirection: "column",
-                      transition: "transform 0.3s",
-                      "&:hover": {
-                        transform: "translateY(-5px)",
-                        boxShadow: "0 10px 20px rgba(0,0,0,0.3)",
-                      },
-                    }}
+              <AnimatePresence>
+                {filteredCourses.map((course) => (
+                  <MotionGrid
+                    size={{ xs: 12, sm: 6, md: 4 }}
+                    key={course.id}
+                    layout
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.8 }}
+                    transition={{ duration: 0.3 }}
                   >
-                    <CardContent sx={{ flexGrow: 1 }}>
-                      <Typography
-                        variant="h6"
-                        sx={{
-                          mb: 1,
-                          display: "-webkit-box",
-                          WebkitLineClamp: 2,
-                          WebkitBoxOrient: "vertical",
-                          overflow: "hidden",
-                        }}
-                      >
-                        {course.title}
-                      </Typography>
-                      {course.description && (
+                    <MotionCard
+                      sx={{
+                        backgroundColor: "background.paper",
+                        height: "100%",
+                        display: "flex",
+                        flexDirection: "column",
+                      }}
+                      whileHover={{
+                        y: -5,
+                        boxShadow: "0 10px 20px rgba(0,0,0,0.3)",
+                      }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <CardContent sx={{ flexGrow: 1 }}>
                         <Typography
-                          variant="body2"
-                          color="text.secondary"
+                          variant="h6"
                           sx={{
-                            mb: 2,
+                            mb: 1,
                             display: "-webkit-box",
                             WebkitLineClamp: 2,
                             WebkitBoxOrient: "vertical",
                             overflow: "hidden",
                           }}
                         >
-                          {course.description}
+                          {course.title}
                         </Typography>
-                      )}
-                      {course.topics && course.topics.length > 0 && (
-                        <Box sx={{ mb: 2 }}>
-                          <Typography variant="caption" color="text.secondary">
-                            Topics:
-                          </Typography>
-                          <Box
+                        {course.description && (
+                          <Typography
+                            variant="body2"
+                            color="text.secondary"
                             sx={{
-                              display: "flex",
-                              flexWrap: "wrap",
-                              gap: 0.5,
-                              mt: 0.5,
+                              mb: 2,
+                              display: "-webkit-box",
+                              WebkitLineClamp: 2,
+                              WebkitBoxOrient: "vertical",
+                              overflow: "hidden",
                             }}
                           >
-                            {course.topics.map((topic) => (
-                              <Chip
-                                key={topic}
-                                label={topic}
-                                size="small"
-                                sx={{
-                                  backgroundColor: "secondary.main",
-                                  color: "text.primary",
-                                }}
-                              />
-                            ))}
+                            {course.description}
+                          </Typography>
+                        )}
+                        {course.topics && course.topics.length > 0 && (
+                          <Box sx={{ mb: 2 }}>
+                            <Typography
+                              variant="caption"
+                              color="text.secondary"
+                            >
+                              Topics:
+                            </Typography>
+                            <Box
+                              sx={{
+                                display: "flex",
+                                flexWrap: "wrap",
+                                gap: 0.5,
+                                mt: 0.5,
+                              }}
+                            >
+                              {course.topics.map((topic) => (
+                                <motion.div
+                                  key={topic}
+                                  whileHover={{ scale: 1.05 }}
+                                >
+                                  <Chip
+                                    label={topic}
+                                    size="small"
+                                    sx={{
+                                      backgroundColor: "secondary.main",
+                                      color: "text.primary",
+                                    }}
+                                  />
+                                </motion.div>
+                              ))}
+                            </Box>
                           </Box>
+                        )}
+                        <Box
+                          sx={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            mb: 1,
+                          }}
+                        >
+                          <Typography variant="body2" color="text.secondary">
+                            {course.lectures?.filter((l) => l.isCompleted)
+                              .length || 0}
+                            /{course.lectures?.length || 0} lectures
+                          </Typography>
+                          <Typography variant="body2" color="primary.main">
+                            {course.progress || 0}%
+                          </Typography>
                         </Box>
-                      )}
-                      <Box
-                        sx={{
-                          display: "flex",
-                          justifyContent: "space-between",
-                          mb: 1,
-                        }}
-                      >
-                        <Typography variant="body2" color="text.secondary">
-                          {course.lectures?.filter((l) => l.isCompleted)
-                            .length || 0}
-                          /{course.lectures?.length || 0} lectures
-                        </Typography>
-                        <Typography variant="body2" color="primary.main">
-                          {course.progress || 0}%
-                        </Typography>
-                      </Box>
-                      <LinearProgress
-                        variant="determinate"
-                        value={course.progress || 0}
-                        sx={{
-                          height: 8,
-                          borderRadius: 5,
-                          backgroundColor: "secondary.main",
-                          "& .MuiLinearProgress-bar": {
-                            background:
-                              "linear-gradient(90deg, #00ADB5, #00FFF0)",
-                          },
-                        }}
-                      />
-                    </CardContent>
-                    <CardActions sx={{ justifyContent: "flex-end" }}>
-                      <Button
-                        onClick={() => {
-                          navigate(`/courses/${course.id}`);
-                        }}
-                        size="small"
-                        color="primary"
-                        sx={{ fontWeight: "bold" }}
-                      >
-                        Continue
-                      </Button>
-                    </CardActions>
-                  </Card>
-                </Grid>
-              ))}
+                        <LinearProgress
+                          variant="determinate"
+                          value={course.progress || 0}
+                          sx={{
+                            height: 8,
+                            borderRadius: 5,
+                            backgroundColor: "secondary.main",
+                            "& .MuiLinearProgress-bar": {
+                              background:
+                                "linear-gradient(90deg, #00ADB5, #00FFF0)",
+                            },
+                          }}
+                        />
+                      </CardContent>
+                      <CardActions sx={{ justifyContent: "flex-end" }}>
+                        <MotionButton
+                          onClick={() => {
+                            navigate(`/courses/${course.id}`);
+                          }}
+                          size="small"
+                          color="primary"
+                          sx={{ fontWeight: "bold" }}
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                        >
+                          Continue
+                        </MotionButton>
+                      </CardActions>
+                    </MotionCard>
+                  </MotionGrid>
+                ))}
+              </AnimatePresence>
             </Grid>
           ) : (
-            <Box
+            <MotionBox
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.3 }}
               sx={{
                 textAlign: "center",
                 mt: 10,
@@ -445,12 +500,16 @@ const MyCoursesSection = () => {
                   ? "No courses available for your selected topics yet"
                   : "You haven't selected any topics in your profile"}
               </Typography>
-              <CustomButton to="/complete-profile">
+              <MotionButton
+                to="/complete-profile"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
                 {userProfile?.topics?.length > 0
                   ? "Browse All Courses"
                   : "Complete Your Profile"}
-              </CustomButton>
-            </Box>
+              </MotionButton>
+            </MotionBox>
           )}
 
           <Box
@@ -470,6 +529,10 @@ const MyCoursesSection = () => {
             fullWidth
             maxWidth="sm"
             PaperProps={{
+              component: motion.div,
+              initial: { opacity: 0, y: -20 },
+              animate: { opacity: 1, y: 0 },
+              exit: { opacity: 0, y: 20 },
               sx: {
                 backgroundColor: "background.paper",
                 color: "text.primary",
@@ -504,17 +567,22 @@ const MyCoursesSection = () => {
                 }}
                 renderTags={(value, getTagProps) =>
                   value.map((option, index) => (
-                    <Chip
-                      variant="outlined"
-                      label={option}
-                      {...getTagProps({ index })}
+                    <motion.div
                       key={option}
-                      sx={{
-                        backgroundColor: "transparent",
-                        color: "text.primary",
-                        borderColor: "primary.main",
-                      }}
-                    />
+                      initial={{ scale: 0.8 }}
+                      animate={{ scale: 1 }}
+                    >
+                      <Chip
+                        variant="outlined"
+                        label={option}
+                        {...getTagProps({ index })}
+                        sx={{
+                          backgroundColor: "transparent",
+                          color: "text.primary",
+                          borderColor: "primary.main",
+                        }}
+                      />
+                    </motion.div>
                   ))
                 }
                 renderInput={(params) => (
@@ -531,12 +599,20 @@ const MyCoursesSection = () => {
             <DialogActions
               sx={{ justifyContent: "space-between", px: 3, pb: 2 }}
             >
-              <Button onClick={handleClose} color="error" variant="outlined">
+              <MotionButton
+                onClick={handleClose}
+                color="error"
+                variant="outlined"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
                 Cancel
-              </Button>
-              <CustomButton
+              </MotionButton>
+              <MotionButton
                 onClick={handleAddCourse}
                 disabled={courseData.topics.length === 0 || isAdding}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
               >
                 {isAdding ? (
                   <>
@@ -546,7 +622,7 @@ const MyCoursesSection = () => {
                 ) : (
                   "Add Courses"
                 )}
-              </CustomButton>
+              </MotionButton>
             </DialogActions>
           </Dialog>
         </Container>

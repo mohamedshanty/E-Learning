@@ -115,7 +115,7 @@ const BlogDetails = () => {
           </Typography>
           <Grid container spacing={3}>
             {related.map((item) => (
-              <Grid item xs={12} sm={6} md={4} key={item.id}>
+              <Grid size={{ xs: 12, sm: 6, md: 4 }} key={item.id}>
                 <Card sx={{ backgroundColor: "#1e1e1e", color: "#fff" }}>
                   <CardMedia
                     component="img"
