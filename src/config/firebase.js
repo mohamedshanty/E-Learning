@@ -33,7 +33,7 @@ const signup = async (firstName, lastName, email, password) => {
       avatar: "",
       role: "student",
       isSuperAdmin: false,
-      lastSeen: Date.now(),
+      // lastSeen: Date.now(),
       enrolledCourses: [],
       profileCompleted: false,
     });

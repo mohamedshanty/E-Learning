@@ -27,6 +27,7 @@ import RefreshIcon from "@mui/icons-material/Refresh";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 import { db } from "../../config/firebase";
 import { doc, getDoc } from "firebase/firestore";
+import CustomTextField from "../../components/customTextField/CustomTextField";
 
 const theme = createTheme({
   palette: {
@@ -191,7 +192,14 @@ const Courses = () => {
                 width: { xs: "100%", sm: "auto" },
               }}
             >
-              <TextField
+              <CustomTextField
+                fullWidth={isMobile}
+                size="small"
+                placeholder="Search courses..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+              {/* <TextField
                 fullWidth={isMobile}
                 size="small"
                 placeholder="Search courses..."
@@ -208,7 +216,8 @@ const Courses = () => {
                     },
                   },
                 }}
-              />
+              /> */}
+
               <Tooltip title="Refresh courses">
                 <IconButton
                   onClick={handleRefresh}

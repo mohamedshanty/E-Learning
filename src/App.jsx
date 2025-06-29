@@ -22,12 +22,12 @@ import AdminUsers from "./components/adminUsers/AdminUsers";
 import AdminCourses from "./components/adminCourses/AdminCourses";
 import AdminLinks from "./components/adminLinks/AdminLinks";
 import AdminBlogs from "./components/adminBlogs/AdminBlogs";
-import AdminResources from "./components/adminResources/AdminResources";
 import ProtectedRoute from "./components/routes/ProtectedRoute";
 import AuthProvider from "./context/AuthContext";
 import { ResourcesProvider } from "./context/ResourcesContext ";
 import ForgetPassword from "./components/forgetPassword/ForgetPassword";
 import ResetPassword from "./components/resetPassword/ResetPassword";
+import EditProfile from "./pages/editProfile/EditProfile";
 
 const App = () => {
   return (
@@ -101,6 +101,7 @@ const App = () => {
                     </ProtectedRoute>
                   }
                 />
+
                 <Route
                   path="/profile-page"
                   element={
@@ -109,6 +110,15 @@ const App = () => {
                     </ProtectedRoute>
                   }
                 />
+                <Route
+                  path="/edit-profile"
+                  element={
+                    <ProtectedRoute>
+                      <EditProfile />
+                    </ProtectedRoute>
+                  }
+                />
+
                 <Route
                   path="/resources"
                   element={
@@ -132,7 +142,6 @@ const App = () => {
                   <Route path="admin-courses" element={<AdminCourses />} />
                   <Route path="admin-links" element={<AdminLinks />} />
                   <Route path="admin-blogs" element={<AdminBlogs />} />
-                  <Route path="admin-resources" element={<AdminResources />} />
                 </Route>
 
                 {/* صفحة 404 محمية */}

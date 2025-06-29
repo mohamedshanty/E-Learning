@@ -38,6 +38,7 @@ import {
 import axios from "axios";
 import { nanoid } from "nanoid";
 import { CloudUpload, Edit, Delete } from "@mui/icons-material";
+import CustomTextField from "../customTextField/CustomTextField";
 
 const topicsByYear = {
   1: ["HTML", "CSS", "JavaScript", "Git and Github"],
@@ -350,7 +351,7 @@ const AdminCourses = () => {
             sx={{ display: "flex", flexDirection: "column", gap: 2 }}
           >
             {!editMode && (
-              <TextField
+              <CustomTextField
                 label="YouTube Playlist URL"
                 value={playlistUrl}
                 onChange={(e) => setPlaylistUrl(e.target.value)}
@@ -358,25 +359,10 @@ const AdminCourses = () => {
                 margin="normal"
                 required={!editMode}
                 placeholder="https://www.youtube.com/playlist?list=..."
-                InputLabelProps={{ style: { color: "#AAAAAA" } }}
-                sx={{
-                  input: { color: "#EEEEEE" },
-                  "& .MuiOutlinedInput-root": {
-                    "& fieldset": {
-                      borderColor: "#333",
-                    },
-                    "&:hover fieldset": {
-                      borderColor: "#00ADB5",
-                    },
-                    "&.Mui-focused fieldset": {
-                      borderColor: "#00ADB5",
-                    },
-                  },
-                }}
               />
             )}
 
-            <TextField
+            <CustomTextField
               label="Course Title"
               value={courseData.title}
               onChange={(e) =>
@@ -385,24 +371,9 @@ const AdminCourses = () => {
               fullWidth
               margin="normal"
               required
-              InputLabelProps={{ style: { color: "#AAAAAA" } }}
-              sx={{
-                input: { color: "#EEEEEE" },
-                "& .MuiOutlinedInput-root": {
-                  "& fieldset": {
-                    borderColor: "#333",
-                  },
-                  "&:hover fieldset": {
-                    borderColor: "#00ADB5",
-                  },
-                  "&.Mui-focused fieldset": {
-                    borderColor: "#00ADB5",
-                  },
-                },
-              }}
             />
 
-            <TextField
+            <CustomTextField
               label="Description"
               value={courseData.description}
               onChange={(e) =>
@@ -412,24 +383,9 @@ const AdminCourses = () => {
               margin="normal"
               multiline
               rows={3}
-              InputLabelProps={{ style: { color: "#AAAAAA" } }}
-              sx={{
-                textarea: { color: "#EEEEEE" },
-                "& .MuiOutlinedInput-root": {
-                  "& fieldset": {
-                    borderColor: "#333",
-                  },
-                  "&:hover fieldset": {
-                    borderColor: "#00ADB5",
-                  },
-                  "&.Mui-focused fieldset": {
-                    borderColor: "#00ADB5",
-                  },
-                },
-              }}
             />
 
-            <TextField
+            <CustomTextField
               label="Category"
               value={courseData.category}
               onChange={(e) =>
@@ -437,21 +393,6 @@ const AdminCourses = () => {
               }
               fullWidth
               margin="normal"
-              InputLabelProps={{ style: { color: "#AAAAAA" } }}
-              sx={{
-                input: { color: "#EEEEEE" },
-                "& .MuiOutlinedInput-root": {
-                  "& fieldset": {
-                    borderColor: "#333",
-                  },
-                  "&:hover fieldset": {
-                    borderColor: "#00ADB5",
-                  },
-                  "&.Mui-focused fieldset": {
-                    borderColor: "#00ADB5",
-                  },
-                },
-              }}
             />
 
             <FormControl fullWidth margin="normal" sx={{ color: "#EEEEEE" }}>

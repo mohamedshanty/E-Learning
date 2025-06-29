@@ -2,8 +2,6 @@ import React, { useState, useContext } from "react";
 import {
   Box,
   Typography,
-  TextField,
-  MenuItem,
   Button,
   Card,
   IconButton,
@@ -20,9 +18,13 @@ import {
   FormControl,
   InputLabel,
   Select,
+  MenuItem,
+  useMediaQuery,
+  useTheme,
 } from "@mui/material";
 import { Edit, Delete } from "@mui/icons-material";
 import { ResourcesContext } from "../../context/ResourcesContext ";
+import CustomTextField from "../customTextField/CustomTextField";
 
 const resourceTypes = ["PDF", "Video", "Link"];
 
@@ -39,6 +41,9 @@ const AdminLinks = () => {
   const [editMode, setEditMode] = useState(false);
   const [currentResource, setCurrentResource] = useState(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
+
+  const theme = useTheme();
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down("md"));
 
   const handleSubmit = async () => {
     if (!title || !url || !type) {
@@ -77,11 +82,13 @@ const AdminLinks = () => {
     setDescription(resource.description || "");
     setType(resource.type);
     setEditMode(true);
+    setMessage({ text: "", type: "" });
   };
 
   const handleDeleteClick = (id) => {
     setCurrentResource(resources.find((r) => r.id === id));
     setConfirmOpen(true);
+    setMessage({ text: "", type: "" });
   };
 
   const handleDelete = async () => {
@@ -104,6 +111,7 @@ const AdminLinks = () => {
     setType("Link");
     setEditMode(false);
     setCurrentResource(null);
+    setMessage({ text: "", type: "" });
   };
 
   return (
@@ -119,8 +127,8 @@ const AdminLinks = () => {
       <Box
         sx={{
           display: "flex",
+          flexDirection: isSmallScreen ? "column" : "row",
           gap: 4,
-          flexDirection: { xs: "column", md: "row" },
         }}
       >
         {/* Resource Form */}
@@ -149,73 +157,34 @@ const AdminLinks = () => {
           <Box
             component="form"
             sx={{ display: "flex", flexDirection: "column", gap: 2 }}
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleSubmit();
+            }}
           >
-            <TextField
-              label="Title *"
+            <CustomTextField
+              label="Title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               fullWidth
-              InputLabelProps={{ style: { color: "#AAAAAA" } }}
-              sx={{
-                input: { color: "#EEEEEE" },
-                "& .MuiOutlinedInput-root": {
-                  "& fieldset": {
-                    borderColor: "#333",
-                  },
-                  "&:hover fieldset": {
-                    borderColor: "#00ADB5",
-                  },
-                  "&.Mui-focused fieldset": {
-                    borderColor: "#00ADB5",
-                  },
-                },
-              }}
+              required
             />
 
-            <TextField
-              label="URL *"
+            <CustomTextField
+              label="URL"
               value={url}
               onChange={(e) => setUrl(e.target.value)}
               fullWidth
-              InputLabelProps={{ style: { color: "#AAAAAA" } }}
-              sx={{
-                input: { color: "#EEEEEE" },
-                "& .MuiOutlinedInput-root": {
-                  "& fieldset": {
-                    borderColor: "#333",
-                  },
-                  "&:hover fieldset": {
-                    borderColor: "#00ADB5",
-                  },
-                  "&.Mui-focused fieldset": {
-                    borderColor: "#00ADB5",
-                  },
-                },
-              }}
+              required
             />
 
-            <TextField
+            <CustomTextField
               label="Description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               fullWidth
               multiline
               rows={3}
-              InputLabelProps={{ style: { color: "#AAAAAA" } }}
-              sx={{
-                textarea: { color: "#EEEEEE" },
-                "& .MuiOutlinedInput-root": {
-                  "& fieldset": {
-                    borderColor: "#333",
-                  },
-                  "&:hover fieldset": {
-                    borderColor: "#00ADB5",
-                  },
-                  "&.Mui-focused fieldset": {
-                    borderColor: "#00ADB5",
-                  },
-                },
-              }}
             />
 
             <FormControl fullWidth sx={{ color: "#EEEEEE" }}>
@@ -245,10 +214,17 @@ const AdminLinks = () => {
               </Select>
             </FormControl>
 
-            <Box sx={{ display: "flex", gap: 2, mt: 3 }}>
+            <Box
+              sx={{
+                display: "flex",
+                gap: 2,
+                mt: 3,
+                flexDirection: isSmallScreen ? "column" : "row",
+              }}
+            >
               <Button
                 variant="contained"
-                onClick={handleSubmit}
+                type="submit"
                 disabled={loading}
                 sx={{
                   backgroundColor: "#00ADB5",
@@ -264,6 +240,7 @@ const AdminLinks = () => {
                   "Add Resource"
                 )}
               </Button>
+
               {editMode && (
                 <Button
                   variant="outlined"
@@ -283,7 +260,14 @@ const AdminLinks = () => {
         </Card>
 
         {/* Resources List */}
-        <Box sx={{ flex: 1 }}>
+        <Box
+          sx={{
+            flex: 1,
+            minWidth: 0,
+            maxHeight: "80vh",
+            overflowY: "auto",
+          }}
+        >
           <Typography variant="h5" mb={2} sx={{ color: "#EEEEEE" }}>
             Existing Resources ({resources.length})
           </Typography>
@@ -293,54 +277,20 @@ const AdminLinks = () => {
               No resources found
             </Typography>
           ) : (
-            <Box sx={{ maxHeight: "80vh", overflowY: "auto", pr: 1 }}>
-              <List>
-                {resources.map((resource) => (
-                  <Card
-                    key={resource.id}
-                    sx={{
-                      mb: 2,
-                      backgroundColor: "#121212",
-                      borderRadius: 2,
-                      boxShadow: "0 2px 8px rgba(0,0,0,0.6)",
-                    }}
-                  >
-                    <ListItem>
-                      <ListItemText
-                        primary={
-                          <Typography sx={{ color: "#EEEEEE" }}>
-                            {resource.title}
-                          </Typography>
-                        }
-                        secondary={
-                          <>
-                            <Box
-                              component="span"
-                              display="block"
-                              sx={{ color: "#AAAAAA" }}
-                            >
-                              {resource.url}
-                            </Box>
-                            <Box
-                              component="span"
-                              display="block"
-                              sx={{ color: "#AAAAAA" }}
-                            >
-                              Type: {resource.type}
-                            </Box>
-                            {resource.description && (
-                              <Box
-                                component="span"
-                                display="block"
-                                sx={{ color: "#AAAAAA" }}
-                              >
-                                {resource.description}
-                              </Box>
-                            )}
-                          </>
-                        }
-                      />
-                      <ListItemSecondaryAction>
+            <List disablePadding>
+              {resources.map((resource) => (
+                <Card
+                  key={resource.id}
+                  sx={{
+                    mb: 2,
+                    backgroundColor: "#121212",
+                    borderRadius: 2,
+                    boxShadow: "0 2px 8px rgba(0,0,0,0.6)",
+                  }}
+                >
+                  <ListItem
+                    secondaryAction={
+                      <Box sx={{ display: "flex", gap: 1 }}>
                         <IconButton
                           edge="end"
                           onClick={() => handleEdit(resource)}
@@ -355,12 +305,47 @@ const AdminLinks = () => {
                         >
                           <Delete />
                         </IconButton>
-                      </ListItemSecondaryAction>
-                    </ListItem>
-                  </Card>
-                ))}
-              </List>
-            </Box>
+                      </Box>
+                    }
+                  >
+                    <ListItemText
+                      primary={
+                        <Typography sx={{ color: "#EEEEEE" }}>
+                          {resource.title}
+                        </Typography>
+                      }
+                      secondary={
+                        <>
+                          <Box
+                            component="span"
+                            display="block"
+                            sx={{ color: "#AAAAAA", wordBreak: "break-word" }}
+                          >
+                            {resource.url}
+                          </Box>
+                          <Box
+                            component="span"
+                            display="block"
+                            sx={{ color: "#AAAAAA" }}
+                          >
+                            Type: {resource.type}
+                          </Box>
+                          {resource.description && (
+                            <Box
+                              component="span"
+                              display="block"
+                              sx={{ color: "#AAAAAA" }}
+                            >
+                              {resource.description}
+                            </Box>
+                          )}
+                        </>
+                      }
+                    />
+                  </ListItem>
+                </Card>
+              ))}
+            </List>
           )}
         </Box>
       </Box>

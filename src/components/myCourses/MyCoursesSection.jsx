@@ -74,12 +74,11 @@ const theme = createTheme({
 });
 
 const topicsByYear = {
-  1: ["HTML", "CSS"],
-  2: ["HTML", "CSS", "JavaScript", "Git and Github"],
-  3: ["React", "Redux", "TypeScript"],
-  4: ["Node.js", "Express", "MongoDB"],
-  5: ["Advanced JS", "Testing", "Performance"],
-  6: ["Project", "Deployment", "CI/CD"],
+  1: ["HTML", "CSS", "JavaScript", "Git and GitHub"],
+  2: ["React", "Redux", "TypeScript"],
+  3: ["Node.js", "Express", "MongoDB"],
+  4: ["Advanced JS", "Testing", "Performance"],
+  5: ["Project", "Deployment", "CI/CD"],
 };
 
 const MyCoursesSection = () => {
@@ -148,7 +147,12 @@ const MyCoursesSection = () => {
       }));
 
       const matchingCourses = allCourses.filter((course) =>
-        course.topics?.some((topic) => courseData.topics.includes(topic))
+        course.topics?.some((topic) =>
+          courseData.topics.some(
+            (selectedTopic) =>
+              topic.toLowerCase() === selectedTopic.toLowerCase()
+          )
+        )
       );
 
       if (matchingCourses.length === 0) {
@@ -203,12 +207,17 @@ const MyCoursesSection = () => {
   const filteredCourses = useMemo(() => {
     if (!userData?.enrolledCourses?.length) return [];
 
-    return courses.filter(
-      (course) =>
-        userData.enrolledCourses.includes(course.id) &&
-        (!userProfile?.topics?.length ||
-          course.topics?.some((topic) => userProfile.topics.includes(topic)))
+    console.log("User enrolledCourses:", userData?.enrolledCourses);
+    console.log("User topics:", userProfile?.topics);
+    console.log("All courses:", courses);
+
+    const filtered = courses.filter((course) =>
+      userData.enrolledCourses.includes(course.id)
     );
+
+    console.log("filteredCourses length:", filtered.length);
+
+    return filtered;
   }, [courses, userData, userProfile]);
 
   if (error) {
@@ -474,7 +483,7 @@ const MyCoursesSection = () => {
                           whileHover={{ scale: 1.05 }}
                           whileTap={{ scale: 0.95 }}
                         >
-                          Continue
+                          Start
                         </MotionButton>
                       </CardActions>
                     </MotionCard>
@@ -562,8 +571,7 @@ const MyCoursesSection = () => {
                 }
                 value={courseData.topics}
                 onChange={(event, newValue) => {
-                  const limitedValues = newValue.slice(0, 3);
-                  setCourseData({ ...courseData, topics: limitedValues });
+                  setCourseData({ ...courseData, topics: newValue });
                 }}
                 renderTags={(value, getTagProps) =>
                   value.map((option, index) => (
@@ -588,7 +596,7 @@ const MyCoursesSection = () => {
                 renderInput={(params) => (
                   <CustomTextField
                     {...params}
-                    label="Select Topics (Max 3)"
+                    label="Select Topics"
                     placeholder="Start typing..."
                   />
                 )}

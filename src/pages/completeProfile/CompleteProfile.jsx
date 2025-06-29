@@ -210,162 +210,129 @@ const CompleteProfile = () => {
             </Typography>
 
             <Box
+              component="form"
+              onSubmit={handleLogin}
               sx={{
                 display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                gap: 4,
+                flexDirection: "column",
+                gap: 3,
+                mt: 4,
               }}
             >
-              <Box
-                component="form"
-                onSubmit={handleLogin}
-                sx={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: 3,
-                  mt: 4,
-                  flex: 1,
-                }}
-              >
-                <label htmlFor="avatar">
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-                    <input
-                      type="file"
-                      name="image"
-                      accept="image/*"
-                      onChange={handleChange}
-                      id="avatar"
-                      hidden
-                    />
-                    <img
-                      style={{
-                        maxWidth: "90px",
-                        aspectRatio: "1/1",
-                        borderRadius: "50%",
-                      }}
-                      src={preview || assets.avatar_icon}
-                      alt="avatar"
-                    />
-                    <Typography variant="body1">
-                      Upload Profile Image
-                    </Typography>
-                  </Box>
-                </label>
+              <label htmlFor="avatar">
+                <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                  <input
+                    type="file"
+                    name="image"
+                    accept="image/*"
+                    onChange={handleChange}
+                    id="avatar"
+                    hidden
+                  />
+                  <img
+                    style={{
+                      maxWidth: "90px",
+                      aspectRatio: "1/1",
+                      borderRadius: "50%",
+                    }}
+                    src={preview || assets.avatar_icon}
+                    alt="avatar"
+                  />
+                  <Typography variant="body1">Upload Profile Image</Typography>
+                </Box>
+              </label>
 
-                <CustomTextField
-                  label="Phone"
-                  name="phone"
-                  fullWidth
-                  value={profileForm.phone}
+              <CustomTextField
+                label="Phone"
+                name="phone"
+                fullWidth
+                value={profileForm.phone}
+                onChange={handleChange}
+                required
+              />
+
+              <FormControl fullWidth>
+                <InputLabel id="year-label">Academic Year</InputLabel>
+                <Select
+                  labelId="year-label"
+                  name="year"
+                  value={profileForm.year}
                   onChange={handleChange}
                   required
-                />
-
-                <FormControl fullWidth>
-                  <InputLabel id="year-label">Academic Year</InputLabel>
-                  <Select
-                    labelId="year-label"
-                    name="year"
-                    value={profileForm.year}
-                    onChange={handleChange}
-                    required
-                    label="Academic Year"
-                    sx={{
-                      color: "text.primary",
-                      "& .MuiOutlinedInput-notchedOutline": {
-                        borderColor: "secondary.main",
-                      },
-                    }}
-                  >
-                    <MenuItem value="">
-                      <em>None</em>
-                    </MenuItem>
-                    <MenuItem value="1">First Year</MenuItem>
-                    <MenuItem value="2">Second Year</MenuItem>
-                    <MenuItem value="3">Third Year</MenuItem>
-                    <MenuItem value="4">Fourth Year</MenuItem>
-                    <MenuItem value="5">Fifth Year</MenuItem>
-                  </Select>
-                </FormControl>
-
-                {profileForm.year && (
-                  <Autocomplete
-                    multiple
-                    options={topicsByYear[profileForm.year] || []}
-                    value={selectedOptions}
-                    onChange={(event, newValue) => {
-                      const limitedValues = newValue.slice(0, 3);
-                      setSelectedOptions(limitedValues);
-                    }}
-                    renderTags={(value, getTagProps) =>
-                      value.map((option, index) => (
-                        <Chip
-                          variant="outlined"
-                          label={option}
-                          {...getTagProps({ index })}
-                          key={option}
-                          sx={{
-                            backgroundColor: "transparent",
-                            color: "text.primary",
-                            borderColor: "primary.main",
-                          }}
-                        />
-                      ))
-                    }
-                    renderInput={(params) => (
-                      <CustomTextField
-                        {...params}
-                        label="Select Topics (Max 3)"
-                        placeholder="Start typing..."
-                      />
-                    )}
-                    sx={{ width: "100%" }}
-                  />
-                )}
-
-                <Button
-                  type="submit"
-                  fullWidth
-                  variant="contained"
-                  disabled={loading || selectedOptions.length === 0}
-                  startIcon={
-                    loading && (
-                      <CircularProgress size={20} sx={{ color: "#ddd" }} />
-                    )
-                  }
+                  label="Academic Year"
                   sx={{
-                    backgroundColor: "primary.main",
-                    color: "#fff",
-                    "&:hover": {
-                      backgroundColor: "primary.dark",
+                    color: "text.primary",
+                    "& .MuiOutlinedInput-notchedOutline": {
+                      borderColor: "secondary.main",
                     },
-                    mt: 2,
                   }}
                 >
-                  {loading ? "Saving..." : "Save Profile"}
-                </Button>
-              </Box>
+                  <MenuItem value="">
+                    <em>None</em>
+                  </MenuItem>
+                  <MenuItem value="1">First Year</MenuItem>
+                  <MenuItem value="2">Second Year</MenuItem>
+                  <MenuItem value="3">Third Year</MenuItem>
+                  <MenuItem value="4">Fourth Year</MenuItem>
+                  <MenuItem value="5">Fifth Year</MenuItem>
+                </Select>
+              </FormControl>
 
-              <Box
+              {profileForm.year && (
+                <Autocomplete
+                  multiple
+                  options={topicsByYear[profileForm.year] || []}
+                  value={selectedOptions}
+                  onChange={(event, newValue) => {
+                    setSelectedOptions(newValue); // السماح باختيار جميع المواضيع بدون تحديد الحد
+                  }}
+                  renderTags={(value, getTagProps) =>
+                    value.map((option, index) => (
+                      <Chip
+                        variant="outlined"
+                        label={option}
+                        {...getTagProps({ index })}
+                        key={option}
+                        sx={{
+                          backgroundColor: "transparent",
+                          color: "text.primary",
+                          borderColor: "primary.main",
+                        }}
+                      />
+                    ))
+                  }
+                  renderInput={(params) => (
+                    <CustomTextField
+                      {...params}
+                      label="Select Topics"
+                      placeholder="Start typing..."
+                    />
+                  )}
+                  sx={{ width: "100%" }}
+                />
+              )}
+
+              <Button
+                type="submit"
+                fullWidth
+                variant="contained"
+                disabled={loading || selectedOptions.length === 0}
+                startIcon={
+                  loading && (
+                    <CircularProgress size={20} sx={{ color: "#ddd" }} />
+                  )
+                }
                 sx={{
-                  flex: 1,
-                  display: { xs: "none", md: "flex" },
-                  alignItems: "center",
-                  justifyContent: "center",
+                  backgroundColor: "primary.main",
+                  color: "#fff",
+                  "&:hover": {
+                    backgroundColor: "primary.dark",
+                  },
+                  mt: 2,
                 }}
               >
-                <img
-                  style={{
-                    maxWidth: "300px",
-                    borderRadius: "16px",
-                    objectFit: "cover",
-                    aspectRatio: "1 / 1",
-                  }}
-                  src={preview || assets.profile_complete_illustration}
-                  alt="Profile Completion"
-                />
-              </Box>
+                {loading ? "Saving..." : "Save Profile"}
+              </Button>
             </Box>
           </Paper>
         </Container>

@@ -1,348 +1,310 @@
-// import React, { useState, useEffect } from "react";
-// import {
-//   Container,
-//   Typography,
-//   TextField,
-//   Button,
-//   Stack,
-//   Paper,
-//   Box,
-//   Avatar,
-//   IconButton,
-//   Divider,
-//   MenuItem,
-// } from "@mui/material";
-// import { db, storage } from "../../config/firebase"; // تأكد من تصدير storage من ملف firebase
-// import { doc, getDoc, updateDoc } from "firebase/firestore";
-// import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-// import { useNavigate } from "react-router-dom";
-// import PhotoCamera from "@mui/icons-material/PhotoCamera";
-// import assets from "../../assets/assets";
+import React, { useEffect, useState } from "react";
+import {
+  Box,
+  Button,
+  Container,
+  MenuItem,
+  Select,
+  Typography,
+  InputLabel,
+  FormControl,
+  Paper,
+  CircularProgress,
+  Autocomplete,
+  Chip,
+} from "@mui/material";
+import { useNavigate } from "react-router-dom";
+import { db } from "../../config/firebase";
+import {
+  doc,
+  getDoc,
+  updateDoc,
+  collection,
+  getDocs,
+} from "firebase/firestore";
+import toast from "react-hot-toast";
+import assets from "../../assets/assets";
+import CustomTextField from "../../components/customTextField/CustomTextField";
+import { uploadImageToCloudinary } from "../../utils/uploadImageToCloudinary";
 
-// const academicYears = [
-//   "First Year",
-//   "Second Year",
-//   "Third Year",
-//   "Fourth Year",
-//   "Graduate",
-// ];
+const topicsByYear = {
+  1: ["HTML", "CSS", "JavaScript", "Git and GitHub"],
+  2: ["React", "Redux", "TypeScript"],
+  3: ["Node.js", "Express", "MongoDB"],
+  4: ["Advanced JS", "Testing", "Performance"],
+  5: ["Project", "Deployment", "CI/CD"],
+};
 
-// const EditProfile = () => {
-//   const [formData, setFormData] = useState({
-//     fullName: "",
-//     phone: "",
-//     year: "",
-//     imageUrl: "",
-//   });
-//   const [loading, setLoading] = useState(false);
-//   const [imagePreview, setImagePreview] = useState("");
-//   const [uploadProgress, setUploadProgress] = useState(0);
-//   const [error, setError] = useState("");
-//   const navigate = useNavigate();
+const EditProfile = () => {
+  const [profileData, setProfileData] = useState({
+    phone: "",
+    year: "",
+    image: null,
+    imageUrl: "",
+  });
+  const [selectedTopics, setSelectedTopics] = useState([]);
+  const [preview, setPreview] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
-//   useEffect(() => {
-//     const fetchProfile = async () => {
-//       const uid = localStorage.getItem("uid");
-//       if (!uid) return;
+  useEffect(() => {
+    const uid = localStorage.getItem("uid");
+    if (!uid) return;
 
-//       try {
-//         const [userDoc, profileDoc] = await Promise.all([
-//           getDoc(doc(db, "users", uid)),
-//           getDoc(doc(db, "profiles", uid)),
-//         ]);
+    const fetchData = async () => {
+      try {
+        const profileDoc = await getDoc(doc(db, "profiles", uid));
+        if (profileDoc.exists()) {
+          const data = profileDoc.data();
+          setProfileData((prev) => ({
+            ...prev,
+            phone: data.phone || "",
+            year: data.year || "",
+            imageUrl: data.imageUrl || "",
+          }));
+          setSelectedTopics(data.topics || []);
+          setPreview(data.imageUrl || "");
+        }
+      } catch (error) {
+        toast.error("Failed to load profile");
+      } finally {
+        setLoading(false);
+      }
+    };
 
-//         const profileData = profileDoc.exists() ? profileDoc.data() : {};
-//         const userData = userDoc.exists() ? userDoc.data() : {};
+    fetchData();
+  }, []);
 
-//         setFormData({
-//           fullName: profileData.fullName || userData.fullName || "",
-//           phone: profileData.phone || "",
-//           year: profileData.year || "",
-//           imageUrl: profileData.imageUrl || userData.avatar || "",
-//         });
+  useEffect(() => {
+    if (profileData.image) {
+      const objectUrl = URL.createObjectURL(profileData.image);
+      setPreview(objectUrl);
+      return () => URL.revokeObjectURL(objectUrl);
+    }
+  }, [profileData.image]);
 
-//         setImagePreview(
-//           profileData.imageUrl || userData.avatar || assets.avatar_icon
-//         );
-//       } catch (error) {
-//         console.error("Error fetching profile:", error);
-//         setError("Failed to load profile data");
-//       }
-//     };
+  const handleChange = (e) => {
+    const { name, value, files } = e.target;
+    setProfileData((prev) => ({
+      ...prev,
+      [name]: files ? files[0] : value,
+    }));
 
-//     fetchProfile();
-//   }, []);
+    if (name === "year") setSelectedTopics([]);
+  };
 
-//   const handleChange = (e) => {
-//     const { name, value } = e.target;
-//     setFormData((prev) => ({ ...prev, [name]: value }));
-//   };
+  const handleSave = async (e) => {
+    e.preventDefault();
+    const uid = localStorage.getItem("uid");
+    if (!uid || !profileData.year || selectedTopics.length === 0) {
+      toast.error("Please fill all fields");
+      return;
+    }
 
-//   const handleImageChange = async (e) => {
-//     const file = e.target.files[0];
-//     if (!file) return;
+    setLoading(true);
+    try {
+      let imageUrl = profileData.imageUrl;
 
-//     try {
-//       setLoading(true);
-//       setError("");
+      if (profileData.image && profileData.image.type?.startsWith("image/")) {
+        imageUrl = await toast.promise(
+          uploadImageToCloudinary(profileData.image),
+          {
+            loading: "Uploading image...",
+            success: "Image uploaded",
+            error: "Image upload failed",
+          }
+        );
+      }
 
-//       // اختر إما Firebase Storage أو Cloudinary
-//       // الطريقة 1: استخدام Firebase Storage
-//       const uid = localStorage.getItem("uid");
-//       const storageRef = ref(storage, `profile_images/${uid}/${file.name}`);
+      // تحديث ملف التعريف أولاً
+      await updateDoc(doc(db, "profiles", uid), {
+        phone: profileData.phone,
+        year: profileData.year,
+        topics: selectedTopics,
+        imageUrl,
+        updatedAt: Date.now(),
+      });
 
-//       // Upload image to Firebase Storage
-//       const uploadTask = uploadBytes(storageRef, file);
-//       uploadTask.on(
-//         "state_changed",
-//         (snapshot) => {
-//           const progress =
-//             (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-//           setUploadProgress(progress);
-//         },
-//         (error) => {
-//           console.error("Upload error:", error);
-//           setError("Failed to upload image");
-//           setLoading(false);
-//         },
-//         async () => {
-//           try {
-//             const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-//             setFormData((prev) => ({ ...prev, imageUrl: downloadURL }));
-//             setImagePreview(downloadURL);
-//           } catch (error) {
-//             console.error("Error getting download URL:", error);
-//             setError("Failed to get image URL");
-//           } finally {
-//             setLoading(false);
-//             setUploadProgress(0);
-//           }
-//         }
-//       );
+      // تحديث الصورة في users أيضاً
+      await updateDoc(doc(db, "users", uid), {
+        avatar: imageUrl,
+      });
 
-//       // الطريقة 2: استخدام Cloudinary (إذا واجهتك مشاكل مع Firebase Storage)
-//       /*
-//       const imageUrl = await uploadImageToCloudinary(file);
-//       setFormData(prev => ({ ...prev, imageUrl }));
-//       setImagePreview(imageUrl);
-//       setLoading(false);
-//       */
-//     } catch (error) {
-//       console.error("Error uploading image:", error);
-//       setError("Failed to upload image");
-//       setLoading(false);
-//     }
-//   };
+      // **الخطوة الجديدة: جلب كل الكورسات من firebase**
+      const coursesSnapshot = await getDocs(collection(db, "courses"));
+      const matchedCourses = coursesSnapshot.docs
+        .map((doc) => ({ id: doc.id, ...doc.data() }))
+        .filter(
+          (course) =>
+            course.year === profileData.year &&
+            course.topics?.some((topic) => selectedTopics.includes(topic))
+        )
+        .map((course) => course.id);
 
-//   const handleSubmit = async (e) => {
-//     e.preventDefault();
-//     const uid = localStorage.getItem("uid");
-//     if (!uid) return;
+      // تحديث enrolledCourses في مستند المستخدم ضمن users
+      await updateDoc(doc(db, "users", uid), {
+        enrolledCourses: matchedCourses,
+      });
 
-//     try {
-//       setLoading(true);
-//       setError("");
+      toast.success("Profile updated successfully");
+      navigate("/home");
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to update profile");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-//       const profileRef = doc(db, "profiles", uid);
-//       const updates = {
-//         fullName: formData.fullName,
-//         phone: formData.phone,
-//         year: formData.year,
-//         updatedAt: new Date().toISOString(),
-//       };
+  if (loading) {
+    return (
+      <Box
+        sx={{
+          minHeight: "100vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          background: "#0A0A0A",
+        }}
+      >
+        <Typography color="#fff">Loading profile...</Typography>
+      </Box>
+    );
+  }
 
-//       // Only update imageUrl if it has changed
-//       if (formData.imageUrl) {
-//         updates.imageUrl = formData.imageUrl;
-//       }
+  return (
+    <Box
+      sx={{
+        minHeight: "100vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        background: "linear-gradient(to bottom, #0A0A0A, #101624)",
+      }}
+    >
+      <Container maxWidth="lg">
+        <Paper
+          sx={{
+            padding: 4,
+            backgroundColor: "#1e1e1e",
+            borderRadius: 3,
+            color: "#eee",
+            boxShadow: 3,
+          }}
+        >
+          <Typography variant="h5" fontWeight="bold" gutterBottom>
+            Edit Your Profile
+          </Typography>
 
-//       await updateDoc(profileRef, updates);
+          <Box
+            component="form"
+            onSubmit={handleSave}
+            sx={{ display: "flex", flexDirection: "column", gap: 3, mt: 2 }}
+          >
+            <label htmlFor="avatar">
+              <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                <input
+                  type="file"
+                  name="image"
+                  accept="image/*"
+                  onChange={handleChange}
+                  id="avatar"
+                  hidden
+                />
+                <img
+                  src={preview || assets.avatar_icon}
+                  alt="avatar"
+                  style={{
+                    width: 80,
+                    height: 80,
+                    borderRadius: "50%",
+                    objectFit: "cover",
+                  }}
+                />
+                <Typography>Upload Profile Image</Typography>
+              </Box>
+            </label>
 
-//       // Also update in users collection
-//       const userUpdates = {
-//         fullName: formData.fullName,
-//       };
+            <CustomTextField
+              label="Phone"
+              name="phone"
+              fullWidth
+              value={profileData.phone}
+              onChange={handleChange}
+              required
+            />
 
-//       if (formData.imageUrl) {
-//         userUpdates.avatar = formData.imageUrl;
-//       }
+            <FormControl fullWidth>
+              <InputLabel id="year-label">Academic Year</InputLabel>
+              <Select
+                labelId="year-label"
+                name="year"
+                value={profileData.year}
+                onChange={handleChange}
+                required
+                label="Academic Year"
+                sx={{ color: "#eee" }}
+              >
+                <MenuItem value="1">First Year</MenuItem>
+                <MenuItem value="2">Second Year</MenuItem>
+                <MenuItem value="3">Third Year</MenuItem>
+                <MenuItem value="4">Fourth Year</MenuItem>
+                <MenuItem value="5">Fifth Year</MenuItem>
+              </Select>
+            </FormControl>
 
-//       await updateDoc(doc(db, "users", uid), userUpdates);
+            {profileData.year && (
+              <Autocomplete
+                multiple
+                options={topicsByYear[profileData.year] || []}
+                value={selectedTopics}
+                onChange={(event, newValue) => setSelectedTopics(newValue)} // السماح باختيار جميع المواضيع
+                renderTags={(value, getTagProps) =>
+                  value.map((option, index) => (
+                    <Chip
+                      label={option}
+                      {...getTagProps({ index })}
+                      key={option}
+                      sx={{
+                        backgroundColor: "#222",
+                        color: "#fff",
+                        borderColor: "#00ADB5",
+                      }}
+                    />
+                  ))
+                }
+                renderInput={(params) => (
+                  <CustomTextField
+                    {...params}
+                    label="Select Topics"
+                    placeholder="Start typing..."
+                  />
+                )}
+              />
+            )}
 
-//       navigate("/profile", { state: { profileUpdated: true } });
-//     } catch (error) {
-//       console.error("Error updating profile:", error);
-//       setError("Failed to update profile");
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
+            <Button
+              type="submit"
+              variant="contained"
+              disabled={loading}
+              startIcon={
+                loading && <CircularProgress size={20} sx={{ color: "#fff" }} />
+              }
+              sx={{
+                backgroundColor: "#00ADB5",
+                color: "#fff",
+                "&:hover": {
+                  backgroundColor: "#007f89",
+                },
+              }}
+            >
+              {loading ? "Saving..." : "Save Changes"}
+            </Button>
+          </Box>
+        </Paper>
+      </Container>
+    </Box>
+  );
+};
 
-//   return (
-//     <Container maxWidth="md" sx={{ py: { xs: 4, md: 10 } }}>
-//       <Paper
-//         elevation={3}
-//         sx={{
-//           p: { xs: 2, sm: 4 },
-//           mx: "auto",
-//           maxWidth: 600,
-//           width: "100%",
-//           background: "linear-gradient(to right, #0f2027, #203a43, #2c5364)",
-//           color: "#fff",
-//         }}
-//       >
-//         <Typography variant="h5" mb={3} color="primary">
-//           Edit Profile
-//         </Typography>
-
-//         {error && (
-//           <Typography color="error" mb={2}>
-//             {error}
-//           </Typography>
-//         )}
-
-//         <Stack spacing={3}>
-//           <Box display="flex" flexDirection="column" alignItems="center">
-//             <Avatar
-//               src={imagePreview}
-//               sx={{
-//                 width: 120,
-//                 height: 120,
-//                 border: "2px solid #00ADB5",
-//                 mb: 2,
-//               }}
-//             />
-//             <input
-//               accept="image/*"
-//               id="profile-image-upload"
-//               type="file"
-//               style={{ display: "none" }}
-//               onChange={handleImageChange}
-//               disabled={loading}
-//             />
-//             <label htmlFor="profile-image-upload">
-//               <IconButton
-//                 color="primary"
-//                 component="span"
-//                 disabled={loading}
-//                 sx={{
-//                   backgroundColor: "#00ADB5",
-//                   "&:hover": { backgroundColor: "#008C9E" },
-//                 }}
-//               >
-//                 <PhotoCamera sx={{ color: "#fff" }} />
-//               </IconButton>
-//             </label>
-//             {uploadProgress > 0 && uploadProgress < 100 && (
-//               <Typography variant="caption" color="textSecondary">
-//                 Uploading: {Math.round(uploadProgress)}%
-//               </Typography>
-//             )}
-//           </Box>
-
-//           <Divider sx={{ borderColor: "#333" }} />
-
-//           <TextField
-//             label="Full Name"
-//             name="fullName"
-//             value={formData.fullName}
-//             onChange={handleChange}
-//             fullWidth
-//             required
-//             sx={{
-//               "& .MuiOutlinedInput-root": {
-//                 "& fieldset": {
-//                   borderColor: "#00ADB5",
-//                 },
-//                 "&:hover fieldset": {
-//                   borderColor: "#00ADB5",
-//                 },
-//               },
-//               "& .MuiInputLabel-root": {
-//                 color: "#00ADB5",
-//               },
-//               "& .MuiInputBase-input": {
-//                 color: "#fff",
-//               },
-//             }}
-//           />
-
-//           <TextField
-//             label="Phone Number"
-//             name="phone"
-//             value={formData.phone}
-//             onChange={handleChange}
-//             fullWidth
-//             sx={{
-//               "& .MuiOutlinedInput-root": {
-//                 "& fieldset": {
-//                   borderColor: "#00ADB5",
-//                 },
-//                 "&:hover fieldset": {
-//                   borderColor: "#00ADB5",
-//                 },
-//               },
-//               "& .MuiInputLabel-root": {
-//                 color: "#00ADB5",
-//               },
-//               "& .MuiInputBase-input": {
-//                 color: "#fff",
-//               },
-//             }}
-//           />
-
-//           <TextField
-//             select
-//             label="Academic Year"
-//             name="year"
-//             value={formData.year}
-//             onChange={handleChange}
-//             fullWidth
-//             sx={{
-//               "& .MuiOutlinedInput-root": {
-//                 "& fieldset": {
-//                   borderColor: "#00ADB5",
-//                 },
-//                 "&:hover fieldset": {
-//                   borderColor: "#00ADB5",
-//                 },
-//               },
-//               "& .MuiInputLabel-root": {
-//                 color: "#00ADB5",
-//               },
-//               "& .MuiInputBase-input": {
-//                 color: "#fff",
-//               },
-//               "& .MuiSvgIcon-root": {
-//                 color: "#00ADB5",
-//               },
-//             }}
-//           >
-//             {academicYears.map((year) => (
-//               <MenuItem key={year} value={year} sx={{ color: "#000" }}>
-//                 {year}
-//               </MenuItem>
-//             ))}
-//           </TextField>
-
-//           <Box textAlign="center" mt={2}>
-//             <Button
-//               variant="contained"
-//               onClick={handleSubmit}
-//               disabled={loading}
-//               sx={{
-//                 px: 5,
-//                 backgroundColor: "#00ADB5",
-//                 "&:hover": { backgroundColor: "#008C9E" },
-//               }}
-//             >
-//               {loading ? "Saving..." : "Save Changes"}
-//             </Button>
-//           </Box>
-//         </Stack>
-//       </Paper>
-//     </Container>
-//   );
-// };
-
-// export default EditProfile;
+export default EditProfile;

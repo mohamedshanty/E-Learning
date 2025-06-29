@@ -158,7 +158,7 @@ const Profile = () => {
         </Box>
 
         <Box sx={{ mt: 2 }}>
-          <CustomButton variant="outlined" to="/profile">
+          <CustomButton variant="outlined" to="/edit-profile">
             Edit Profile
           </CustomButton>
         </Box>

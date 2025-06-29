@@ -20,6 +20,7 @@ import {
   Tooltip,
   Chip,
   Collapse,
+  Grid,
 } from "@mui/material";
 import { collection, getDocs, doc, updateDoc } from "firebase/firestore";
 import { db } from "../../config/firebase";
@@ -36,6 +37,8 @@ import {
   Subject as TopicsIcon,
   KeyboardArrowDown,
   KeyboardArrowUp,
+  Email as EmailIcon,
+  Person as PersonIcon,
 } from "@mui/icons-material";
 import { AuthContext } from "../../context/AuthContext";
 
@@ -49,7 +52,8 @@ const AdminUsers = () => {
 
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-  const isTablet = useMediaQuery(theme.breakpoints.down("md"));
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down(600));
+  const isLargeScreen = useMediaQuery(theme.breakpoints.up("lg"));
 
   const { currentUser } = useContext(AuthContext);
   const isSuperAdmin = currentUser?.isSuperAdmin;
@@ -127,58 +131,92 @@ const AdminUsers = () => {
     />
   );
 
-  const ProfileInfoRow = ({ userId }) => {
-    const profile = profiles[userId];
-
-    if (!profile) {
-      return (
-        <TableRow>
-          <TableCell
-            colSpan={isMobile ? 3 : 5}
-            sx={{ color: "#AAAAAA", fontStyle: "italic" }}
-          >
-            No profile information available
-          </TableCell>
-        </TableRow>
-      );
-    }
+  const UserDetailsRow = ({ user }) => {
+    const profile = profiles[user.id];
 
     return (
       <TableRow>
-        <TableCell colSpan={isMobile ? 3 : 5} sx={{ padding: 0 }}>
+        <TableCell colSpan={isMobile ? 2 : 5} sx={{ padding: 0 }}>
           <Box sx={{ backgroundColor: "#0A0A0A", p: 2 }}>
-            <Box
-              sx={{
-                display: "grid",
-                gridTemplateColumns: isMobile ? "1fr" : "repeat(3, 1fr)",
-                gap: 2,
-              }}
-            >
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                <PhoneIcon fontSize="small" color="primary" />
-                <Typography variant="body2" sx={{ color: "#EEEEEE" }}>
-                  Phone: {profile.phone || "Not provided"}
-                </Typography>
-              </Box>
-
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                <YearIcon fontSize="small" color="primary" />
-                <Typography variant="body2" sx={{ color: "#EEEEEE" }}>
-                  Year: {profile.year ? `Year ${profile.year}` : "Not provided"}
-                </Typography>
-              </Box>
-
-              <Box sx={{ display: "flex", alignItems: "flex-start", gap: 1 }}>
-                <TopicsIcon fontSize="small" color="primary" sx={{ mt: 0.5 }} />
-                <Box>
+            <Grid container spacing={2}>
+              {/* Basic Info */}
+              <Grid item xs={12} sm={6} md={4}>
+                <Box sx={{ mb: 2 }}>
                   <Typography
-                    variant="body2"
-                    sx={{ color: "#EEEEEE", mb: 0.5 }}
+                    variant="subtitle2"
+                    sx={{ color: "#00ADB5", mb: 1 }}
                   >
-                    Topics:
+                    Basic Information
+                  </Typography>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 1,
+                      mb: 1,
+                    }}
+                  >
+                    <EmailIcon fontSize="small" color="primary" />
+                    <Typography variant="body2" sx={{ color: "#EEEEEE" }}>
+                      {user.email}
+                    </Typography>
+                  </Box>
+                  {profile?.phone && (
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 1,
+                        mb: 1,
+                      }}
+                    >
+                      <PhoneIcon fontSize="small" color="primary" />
+                      <Typography variant="body2" sx={{ color: "#EEEEEE" }}>
+                        {profile.phone}
+                      </Typography>
+                    </Box>
+                  )}
+                </Box>
+              </Grid>
+
+              {/* Academic Info */}
+              <Grid item xs={12} sm={6} md={4}>
+                <Box sx={{ mb: 2 }}>
+                  <Typography
+                    variant="subtitle2"
+                    sx={{ color: "#00ADB5", mb: 1 }}
+                  >
+                    Academic Information
+                  </Typography>
+                  {profile?.year && (
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 1,
+                        mb: 1,
+                      }}
+                    >
+                      <YearIcon fontSize="small" color="primary" />
+                      <Typography variant="body2" sx={{ color: "#EEEEEE" }}>
+                        Year {profile.year}
+                      </Typography>
+                    </Box>
+                  )}
+                </Box>
+              </Grid>
+
+              {/* Topics */}
+              <Grid item xs={12} md={4}>
+                <Box sx={{ mb: 2 }}>
+                  <Typography
+                    variant="subtitle2"
+                    sx={{ color: "#00ADB5", mb: 1 }}
+                  >
+                    Interests
                   </Typography>
                   <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
-                    {profile.topics?.length > 0 ? (
+                    {profile?.topics?.length > 0 ? (
                       profile.topics.map((topic, index) => (
                         <Chip
                           key={index}
@@ -201,8 +239,121 @@ const AdminUsers = () => {
                     )}
                   </Box>
                 </Box>
-              </Box>
+              </Grid>
+            </Grid>
+          </Box>
+        </TableCell>
+      </TableRow>
+    );
+  };
+
+  // Render normal table row for large screens
+  const NormalTableRow = ({ user }) => {
+    const profile = profiles[user.id];
+
+    return (
+      <TableRow
+        sx={{
+          "&:hover": {
+            backgroundColor: "rgba(0, 173, 181, 0.05)",
+          },
+        }}
+      >
+        <TableCell>
+          <Avatar
+            src={user.photoURL || user.avatar || assets.avatar_icon}
+            sx={{
+              width: 40,
+              height: 40,
+              border: "2px solid #00ADB5",
+            }}
+          />
+        </TableCell>
+        <TableCell sx={{ color: "#EEEEEE" }}>
+          <Typography fontWeight={600}>
+            {user.displayName || user.fullName || "No Name"}
+          </Typography>
+        </TableCell>
+        <TableCell sx={{ color: "#EEEEEE" }}>{user.email}</TableCell>
+        {isSuperAdmin && (
+          <TableCell>
+            <Select
+              value={user.role || "student"}
+              onChange={(e) => handleRoleChange(user.id, e.target.value)}
+              size="small"
+              sx={{
+                color: "#EEEEEE",
+                backgroundColor: "#0A0A0A",
+                ".MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#393E46",
+                },
+                "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#00ADB5",
+                },
+                "&:hover .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#00ADB5",
+                },
+              }}
+              renderValue={(selected) => <RoleChip role={selected} />}
+            >
+              <MenuItem value="student">
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  <StudentIcon fontSize="small" />
+                  <span>Student</span>
+                </Box>
+              </MenuItem>
+              <MenuItem value="admin">
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  <AdminIcon fontSize="small" />
+                  <span>Admin</span>
+                </Box>
+              </MenuItem>
+            </Select>
+          </TableCell>
+        )}
+        <TableCell>
+          {profile?.phone && (
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+              <PhoneIcon fontSize="small" color="primary" />
+              <Typography variant="body2" sx={{ color: "#EEEEEE" }}>
+                {profile.phone}
+              </Typography>
             </Box>
+          )}
+        </TableCell>
+        <TableCell>
+          {profile?.year && (
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+              <YearIcon fontSize="small" color="primary" />
+              <Typography variant="body2" sx={{ color: "#EEEEEE" }}>
+                Year {profile.year}
+              </Typography>
+            </Box>
+          )}
+        </TableCell>
+        <TableCell>
+          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
+            {profile?.topics?.length > 0 ? (
+              profile.topics.map((topic, index) => (
+                <Chip
+                  key={index}
+                  label={topic}
+                  size="small"
+                  sx={{
+                    backgroundColor: "#393E4620",
+                    color: "#EEEEEE",
+                    border: "1px solid #00ADB5",
+                  }}
+                />
+              ))
+            ) : (
+              <Typography
+                variant="body2"
+                sx={{ color: "#AAAAAA", fontStyle: "italic" }}
+              >
+                No topics
+              </Typography>
+            )}
           </Box>
         </TableCell>
       </TableRow>
@@ -210,7 +361,7 @@ const AdminUsers = () => {
   };
 
   return (
-    <Box sx={{ p: { xs: 2, md: 3 } }}>
+    <Box sx={{ p: { xs: 1, sm: 2, md: 3 } }}>
       <Box
         sx={{
           display: "flex",
@@ -223,7 +374,7 @@ const AdminUsers = () => {
       >
         <Box>
           <Typography
-            variant="h4"
+            variant={isSmallScreen ? "h5" : "h4"}
             component="h1"
             sx={{ fontWeight: 700, color: "#00ADB5", mb: 1 }}
           >
@@ -231,7 +382,11 @@ const AdminUsers = () => {
           </Typography>
           <Typography
             variant="subtitle1"
-            sx={{ color: "#AAAAAA", fontWeight: 400 }}
+            sx={{
+              color: "#AAAAAA",
+              fontWeight: 400,
+              fontSize: isSmallScreen ? "0.875rem" : "1rem",
+            }}
           >
             View and manage all registered users and their profiles
           </Typography>
@@ -270,7 +425,10 @@ const AdminUsers = () => {
           flexWrap: "wrap",
         }}
       >
-        <FormControl size="small" sx={{ minWidth: 180 }}>
+        <FormControl
+          size="small"
+          sx={{ minWidth: isSmallScreen ? "100%" : 180 }}
+        >
           <InputLabel sx={{ color: "#AAAAAA" }}>
             <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
               <FilterIcon fontSize="small" />
@@ -303,7 +461,13 @@ const AdminUsers = () => {
           </Select>
         </FormControl>
 
-        <Typography variant="body2" sx={{ color: "#AAAAAA" }}>
+        <Typography
+          variant="body2"
+          sx={{
+            color: "#AAAAAA",
+            fontSize: isSmallScreen ? "0.75rem" : "0.875rem",
+          }}
+        >
           Showing {filteredUsers.length} of {users.length} users
         </Typography>
       </Box>
@@ -327,162 +491,232 @@ const AdminUsers = () => {
           <Table size={isMobile ? "small" : "medium"}>
             <TableHead>
               <TableRow sx={{ backgroundColor: "#0A0A0A" }}>
-                {!isMobile && (
-                  <TableCell sx={{ color: "#00ADB5", fontWeight: 600 }}>
-                    Avatar
-                  </TableCell>
+                {isLargeScreen ? (
+                  <>
+                    <TableCell sx={{ color: "#00ADB5", fontWeight: 600 }}>
+                      Avatar
+                    </TableCell>
+                    <TableCell sx={{ color: "#00ADB5", fontWeight: 600 }}>
+                      Name
+                    </TableCell>
+                    <TableCell sx={{ color: "#00ADB5", fontWeight: 600 }}>
+                      Email
+                    </TableCell>
+                    {isSuperAdmin && (
+                      <TableCell sx={{ color: "#00ADB5", fontWeight: 600 }}>
+                        Role
+                      </TableCell>
+                    )}
+                    <TableCell sx={{ color: "#00ADB5", fontWeight: 600 }}>
+                      Phone
+                    </TableCell>
+                    <TableCell sx={{ color: "#00ADB5", fontWeight: 600 }}>
+                      Year
+                    </TableCell>
+                    <TableCell sx={{ color: "#00ADB5", fontWeight: 600 }}>
+                      Topics
+                    </TableCell>
+                  </>
+                ) : (
+                  <>
+                    {!isMobile && (
+                      <TableCell sx={{ color: "#00ADB5", fontWeight: 600 }}>
+                        Avatar
+                      </TableCell>
+                    )}
+                    <TableCell sx={{ color: "#00ADB5", fontWeight: 600 }}>
+                      Name
+                    </TableCell>
+                    {isSuperAdmin && (
+                      <TableCell sx={{ color: "#00ADB5", fontWeight: 600 }}>
+                        Role
+                      </TableCell>
+                    )}
+                    <TableCell sx={{ color: "#00ADB5", fontWeight: 600 }}>
+                      Details
+                    </TableCell>
+                  </>
                 )}
-                <TableCell sx={{ color: "#00ADB5", fontWeight: 600 }}>
-                  Name
-                </TableCell>
-                {!isTablet && (
-                  <TableCell sx={{ color: "#00ADB5", fontWeight: 600 }}>
-                    Email
-                  </TableCell>
-                )}
-                {isSuperAdmin && (
-                  <TableCell sx={{ color: "#00ADB5", fontWeight: 600 }}>
-                    Role
-                  </TableCell>
-                )}
-                <TableCell sx={{ color: "#00ADB5", fontWeight: 600 }}>
-                  Profile
-                </TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {filteredUsers.length === 0 ? (
                 <TableRow>
                   <TableCell
-                    colSpan={5}
+                    colSpan={isLargeScreen ? 7 : 4}
                     sx={{ color: "#EEEEEE", textAlign: "center", py: 4 }}
                   >
                     No users found matching your criteria
                   </TableCell>
                 </TableRow>
               ) : (
-                filteredUsers.map((user) => (
-                  <React.Fragment key={user.id}>
-                    <TableRow
-                      sx={{
-                        "&:hover": {
-                          backgroundColor: "rgba(0, 173, 181, 0.05)",
-                        },
-                      }}
-                    >
-                      {!isMobile && (
-                        <TableCell>
-                          <Avatar
-                            src={
-                              user.photoURL || user.avatar || assets.avatar_icon
-                            }
-                            sx={{
-                              width: 40,
-                              height: 40,
-                              border: "2px solid #00ADB5",
-                            }}
-                          />
-                        </TableCell>
-                      )}
-                      <TableCell sx={{ color: "#EEEEEE" }}>
-                        <Box>
-                          <Typography fontWeight={600}>
-                            {user.displayName || user.fullName || "No Name"}
-                          </Typography>
-                          {isTablet && (
-                            <Typography
-                              variant="body2"
-                              sx={{ color: "#AAAAAA" }}
-                            >
-                              {user.email}
-                            </Typography>
-                          )}
-                        </Box>
-                      </TableCell>
-                      {!isTablet && (
+                filteredUsers.map((user) =>
+                  isLargeScreen ? (
+                    <NormalTableRow key={user.id} user={user} />
+                  ) : (
+                    <React.Fragment key={user.id}>
+                      <TableRow
+                        sx={{
+                          "&:hover": {
+                            backgroundColor: "rgba(0, 173, 181, 0.05)",
+                          },
+                        }}
+                      >
+                        {!isMobile && (
+                          <TableCell>
+                            <Avatar
+                              src={
+                                user.photoURL ||
+                                user.avatar ||
+                                assets.avatar_icon
+                              }
+                              sx={{
+                                width: 40,
+                                height: 40,
+                                border: "2px solid #00ADB5",
+                              }}
+                            />
+                          </TableCell>
+                        )}
                         <TableCell sx={{ color: "#EEEEEE" }}>
-                          {user.email}
-                        </TableCell>
-                      )}
-                      {isSuperAdmin && (
-                        <TableCell>
-                          <Select
-                            value={user.role || "student"}
-                            onChange={(e) =>
-                              handleRoleChange(user.id, e.target.value)
-                            }
-                            size="small"
+                          <Box
                             sx={{
-                              color: "#EEEEEE",
-                              backgroundColor: "#0A0A0A",
-                              ".MuiOutlinedInput-notchedOutline": {
-                                borderColor: "#393E46",
-                              },
-                              "&.Mui-focused .MuiOutlinedInput-notchedOutline":
-                                {
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 1,
+                            }}
+                          >
+                            {isMobile && (
+                              <Avatar
+                                src={
+                                  user.photoURL ||
+                                  user.avatar ||
+                                  assets.avatar_icon
+                                }
+                                sx={{
+                                  width: 32,
+                                  height: 32,
+                                  border: "2px solid #00ADB5",
+                                }}
+                              />
+                            )}
+                            <Box>
+                              <Typography
+                                fontWeight={600}
+                                sx={{
+                                  fontSize: isSmallScreen ? "0.875rem" : "1rem",
+                                }}
+                              >
+                                {user.displayName || user.fullName || "No Name"}
+                              </Typography>
+                            </Box>
+                          </Box>
+                        </TableCell>
+                        {isSuperAdmin && (
+                          <TableCell>
+                            <Select
+                              value={user.role || "student"}
+                              onChange={(e) =>
+                                handleRoleChange(user.id, e.target.value)
+                              }
+                              size="small"
+                              sx={{
+                                color: "#EEEEEE",
+                                backgroundColor: "#0A0A0A",
+                                ".MuiOutlinedInput-notchedOutline": {
+                                  borderColor: "#393E46",
+                                },
+                                "&.Mui-focused .MuiOutlinedInput-notchedOutline":
+                                  {
+                                    borderColor: "#00ADB5",
+                                  },
+                                "&:hover .MuiOutlinedInput-notchedOutline": {
                                   borderColor: "#00ADB5",
                                 },
-                              "&:hover .MuiOutlinedInput-notchedOutline": {
-                                borderColor: "#00ADB5",
-                              },
-                            }}
-                            renderValue={(selected) => (
-                              <RoleChip role={selected} />
-                            )}
+                                fontSize: isSmallScreen
+                                  ? "0.75rem"
+                                  : "0.875rem",
+                              }}
+                              renderValue={(selected) => (
+                                <RoleChip role={selected} />
+                              )}
+                            >
+                              <MenuItem
+                                value="student"
+                                sx={{
+                                  fontSize: isSmallScreen
+                                    ? "0.75rem"
+                                    : "0.875rem",
+                                }}
+                              >
+                                <Box
+                                  sx={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: 1,
+                                  }}
+                                >
+                                  <StudentIcon fontSize="small" />
+                                  <span>Student</span>
+                                </Box>
+                              </MenuItem>
+                              <MenuItem
+                                value="admin"
+                                sx={{
+                                  fontSize: isSmallScreen
+                                    ? "0.75rem"
+                                    : "0.875rem",
+                                }}
+                              >
+                                <Box
+                                  sx={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: 1,
+                                  }}
+                                >
+                                  <AdminIcon fontSize="small" />
+                                  <span>Admin</span>
+                                </Box>
+                              </MenuItem>
+                            </Select>
+                          </TableCell>
+                        )}
+                        <TableCell>
+                          <Tooltip
+                            title={
+                              expandedRows.includes(user.id)
+                                ? "Hide details"
+                                : "Show details"
+                            }
                           >
-                            <MenuItem value="student">
-                              <Box
-                                sx={{
-                                  display: "flex",
-                                  alignItems: "center",
-                                  gap: 1,
-                                }}
-                              >
-                                <StudentIcon fontSize="small" />
-                                <span>Student</span>
-                              </Box>
-                            </MenuItem>
-                            <MenuItem value="admin">
-                              <Box
-                                sx={{
-                                  display: "flex",
-                                  alignItems: "center",
-                                  gap: 1,
-                                }}
-                              >
-                                <AdminIcon fontSize="small" />
-                                <span>Admin</span>
-                              </Box>
-                            </MenuItem>
-                          </Select>
+                            <IconButton
+                              size="small"
+                              onClick={() => toggleRowExpand(user.id)}
+                              sx={{ color: "#00ADB5" }}
+                            >
+                              {expandedRows.includes(user.id) ? (
+                                <KeyboardArrowUp />
+                              ) : (
+                                <KeyboardArrowDown />
+                              )}
+                            </IconButton>
+                          </Tooltip>
                         </TableCell>
-                      )}
-                      <TableCell>
-                        <IconButton
-                          size="small"
-                          onClick={() => toggleRowExpand(user.id)}
-                          sx={{ color: "#00ADB5" }}
+                      </TableRow>
+                      <TableRow>
+                        <TableCell
+                          colSpan={isMobile ? 2 : 4}
+                          sx={{ padding: 0, borderBottom: 0 }}
                         >
-                          {expandedRows.includes(user.id) ? (
-                            <KeyboardArrowUp />
-                          ) : (
-                            <KeyboardArrowDown />
-                          )}
-                        </IconButton>
-                      </TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell
-                        colSpan={isMobile ? 3 : 5}
-                        sx={{ padding: 0, borderBottom: 0 }}
-                      >
-                        <Collapse in={expandedRows.includes(user.id)}>
-                          <ProfileInfoRow userId={user.id} />
-                        </Collapse>
-                      </TableCell>
-                    </TableRow>
-                  </React.Fragment>
-                ))
+                          <Collapse in={expandedRows.includes(user.id)}>
+                            <UserDetailsRow user={user} />
+                          </Collapse>
+                        </TableCell>
+                      </TableRow>
+                    </React.Fragment>
+                  )
+                )
               )}
             </TableBody>
           </Table>

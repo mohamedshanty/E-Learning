@@ -30,6 +30,7 @@ import {
 } from "firebase/firestore";
 import { uploadImageToCloudinary } from "../../utils/uploadImageToCloudinary";
 import { Delete, Edit, CloudUpload } from "@mui/icons-material";
+import CustomTextField from "../customTextField/CustomTextField";
 
 const AdminBlogUpload = () => {
   const [form, setForm] = useState({
@@ -212,7 +213,7 @@ const AdminBlogUpload = () => {
           }}
         >
           <form onSubmit={handleSubmit}>
-            <TextField
+            <CustomTextField
               label="Title"
               name="title"
               fullWidth
@@ -220,24 +221,9 @@ const AdminBlogUpload = () => {
               value={form.title}
               onChange={handleChange}
               required
-              InputLabelProps={{ style: { color: "#AAAAAA" } }}
-              sx={{
-                input: { color: "#EEEEEE" },
-                "& .MuiOutlinedInput-root": {
-                  "& fieldset": {
-                    borderColor: "#333",
-                  },
-                  "&:hover fieldset": {
-                    borderColor: "#00ADB5",
-                  },
-                  "&.Mui-focused fieldset": {
-                    borderColor: "#00ADB5",
-                  },
-                },
-              }}
             />
 
-            <TextField
+            <CustomTextField
               label="Summary"
               name="summary"
               fullWidth
@@ -245,24 +231,9 @@ const AdminBlogUpload = () => {
               value={form.summary}
               onChange={handleChange}
               required
-              InputLabelProps={{ style: { color: "#AAAAAA" } }}
-              sx={{
-                input: { color: "#EEEEEE" },
-                "& .MuiOutlinedInput-root": {
-                  "& fieldset": {
-                    borderColor: "#333",
-                  },
-                  "&:hover fieldset": {
-                    borderColor: "#00ADB5",
-                  },
-                  "&.Mui-focused fieldset": {
-                    borderColor: "#00ADB5",
-                  },
-                },
-              }}
             />
 
-            <TextField
+            <CustomTextField
               label="Content"
               name="content"
               multiline
@@ -272,21 +243,6 @@ const AdminBlogUpload = () => {
               value={form.content}
               onChange={handleChange}
               required
-              InputLabelProps={{ style: { color: "#AAAAAA" } }}
-              sx={{
-                textarea: { color: "#EEEEEE" },
-                "& .MuiOutlinedInput-root": {
-                  "& fieldset": {
-                    borderColor: "#333",
-                  },
-                  "&:hover fieldset": {
-                    borderColor: "#00ADB5",
-                  },
-                  "&.Mui-focused fieldset": {
-                    borderColor: "#00ADB5",
-                  },
-                },
-              }}
             />
 
             <FormControl fullWidth margin="normal" sx={{ color: "#EEEEEE" }}>
