@@ -284,7 +284,7 @@ const CompleteProfile = () => {
                   options={topicsByYear[profileForm.year] || []}
                   value={selectedOptions}
                   onChange={(event, newValue) => {
-                    setSelectedOptions(newValue); // السماح باختيار جميع المواضيع بدون تحديد الحد
+                    setSelectedOptions(newValue);
                   }}
                   renderTags={(value, getTagProps) =>
                     value.map((option, index) => (

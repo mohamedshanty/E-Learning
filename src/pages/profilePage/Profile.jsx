@@ -58,12 +58,10 @@ const Profile = () => {
   const getAvatarSrc = () => {
     if (!userData) return assets.avatar_icon;
 
-    // تحقق من وجود الصورة في profile.imageUrl أولاً
     if (userData.imageUrl && isValidImageUrl(userData.imageUrl)) {
       return userData.imageUrl;
     }
 
-    // ثم تحقق من وجودها في user.avatar (إذا كان موجوداً)
     if (userData.avatar && isValidImageUrl(userData.avatar)) {
       return userData.avatar;
     }

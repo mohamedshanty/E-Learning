@@ -1,5 +1,3 @@
-// src/pages/Auth/ForgetPassword.jsx
-
 import React, { useState } from "react";
 import {
   Box,

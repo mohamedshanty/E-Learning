@@ -10,8 +10,6 @@ import {
   Grid,
   List,
   ListItem,
-  Card,
-  CardContent,
   Divider,
 } from "@mui/material";
 import CustomButton from "../../components/CustomButton/CustomButton";
@@ -19,7 +17,6 @@ import ReactPlayer from "react-player";
 import { useNavigate } from "react-router-dom";
 
 const WatchLater = () => {
-  const [currentLectureIndex, setCurrentLectureIndex] = useState(0);
   const { watchLaterVideos, removeFromWatchLater } =
     useContext(WatchLaterContext);
   const [selected, setSelected] = useState(watchLaterVideos[0] || null);

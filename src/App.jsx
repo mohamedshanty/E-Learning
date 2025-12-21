@@ -128,7 +128,6 @@ const App = () => {
                   }
                 />
 
-                {/* صفحة dashboard محمية ويجب أن يكون دور المستخدم admin */}
                 <Route
                   path="/dashboard/*"
                   element={
@@ -144,7 +143,6 @@ const App = () => {
                   <Route path="admin-blogs" element={<AdminBlogs />} />
                 </Route>
 
-                {/* صفحة 404 محمية */}
                 <Route
                   path="*"
                   element={

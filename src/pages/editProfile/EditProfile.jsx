@@ -116,7 +116,6 @@ const EditProfile = () => {
         );
       }
 
-      // تحديث ملف التعريف أولاً
       await updateDoc(doc(db, "profiles", uid), {
         phone: profileData.phone,
         year: profileData.year,
@@ -125,12 +124,10 @@ const EditProfile = () => {
         updatedAt: Date.now(),
       });
 
-      // تحديث الصورة في users أيضاً
       await updateDoc(doc(db, "users", uid), {
         avatar: imageUrl,
       });
 
-      // **الخطوة الجديدة: جلب كل الكورسات من firebase**
       const coursesSnapshot = await getDocs(collection(db, "courses"));
       const matchedCourses = coursesSnapshot.docs
         .map((doc) => ({ id: doc.id, ...doc.data() }))
@@ -141,7 +138,6 @@ const EditProfile = () => {
         )
         .map((course) => course.id);
 
-      // تحديث enrolledCourses في مستند المستخدم ضمن users
       await updateDoc(doc(db, "users", uid), {
         enrolledCourses: matchedCourses,
       });
@@ -258,7 +254,7 @@ const EditProfile = () => {
                 multiple
                 options={topicsByYear[profileData.year] || []}
                 value={selectedTopics}
-                onChange={(event, newValue) => setSelectedTopics(newValue)} // السماح باختيار جميع المواضيع
+                onChange={(event, newValue) => setSelectedTopics(newValue)}
                 renderTags={(value, getTagProps) =>
                   value.map((option, index) => (
                     <Chip

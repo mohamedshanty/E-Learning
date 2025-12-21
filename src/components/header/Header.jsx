@@ -153,7 +153,6 @@ const Header = () => {
               UniLearn
             </Typography>
 
-            {/* روابط التنقل - عرض على الشاشات الكبيرة */}
             <Box sx={{ display: { xs: "none", md: "flex" }, gap: 2 }}>
               {navigationItems.map((item) => (
                 <Button
@@ -175,7 +174,6 @@ const Header = () => {
             <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
               {isLoggedIn && userData ? (
                 <>
-                  {/* زر Dashboard يظهر فقط على md وأكبر */}
                   {userData.role === "admin" && (
                     <Button
                       variant="outlined"
@@ -188,7 +186,7 @@ const Header = () => {
                         minWidth: "80px",
                         color: "#00ADB5",
                         borderColor: "#00ADB5",
-                        display: { xs: "none", md: "inline-flex" }, // هنا تم تعديل الdisplay
+                        display: { xs: "none", md: "inline-flex" },
                         "&:hover": {
                           borderColor: "#008C9E",
                           backgroundColor: "rgba(0, 173, 181, 0.1)",
@@ -295,7 +293,6 @@ const Header = () => {
               </ListItem>
             ))}
 
-            {/* Dashboard في القائمة الجانبية للادمن فقط */}
             {userData?.role === "admin" && (
               <ListItem
                 button
