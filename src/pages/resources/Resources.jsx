@@ -88,42 +88,109 @@ const Resources = () => {
           <Grid container spacing={4}>
             {paginated.map((res) => (
               <Grid size={{ xs: 12, sm: 6, md: 4 }} key={res.id}>
-                <Card
-                  sx={{
-                    backgroundColor: "#1e1e1e",
-                    color: "white",
-                    borderRadius: 2,
-                    height: "100%",
-                    transition: "transform 0.3s ease",
-                    "&:hover": {
-                      transform: "scale(1.02)",
-                    },
-                  }}
-                >
-                  <CardContent>
-                    <Stack
-                      direction="row"
-                      alignItems="center"
-                      spacing={1}
-                      sx={{ mb: 2 }}
-                    >
-                      {typeIcons[res.type]}
-                      <Typography variant="h6">{res.title}</Typography>
-                    </Stack>
-                    <Typography variant="body2" color="#cccccc">
-                      {res.description}
-                    </Typography>
-                  </CardContent>
-                  <CardActions>
-                    <Button
-                      size="small"
-                      onClick={() => window.open(res.url, "_blank")}
-                      sx={{ color: "#00ADB5" }}
-                    >
-                      {res.type === "PDF" ? "Download" : "Open"}
-                    </Button>
-                  </CardActions>
-                </Card>
+                <Box sx={{ height: "100%", display: "flex" }}>
+                  <Card
+                    sx={{
+                      backgroundColor: "#1e1e1e",
+                      color: "white",
+                      borderRadius: 2,
+                      display: "flex",
+                      flexDirection: "column",
+                      flexGrow: 1,
+                      transition: "transform 0.3s ease",
+                      "&:hover": {
+                        transform: "scale(1.02)",
+                        boxShadow: "0 8px 16px rgba(0,0,0,0.2)",
+                      },
+                    }}
+                  >
+                    <CardContent sx={{ flexGrow: 1, pb: 1 }}>
+                      <Box
+                        sx={{
+                          display: "flex",
+                          alignItems: "flex-start",
+                          gap: 1,
+                          mb: 2,
+                          height: "56px",
+                        }}
+                      >
+                        <Box
+                          sx={{
+                            color: "#00ADB5",
+                            flexShrink: 0,
+                            mt: 0.5,
+                          }}
+                        >
+                          {typeIcons[res.type]}
+                        </Box>
+                        <Typography
+                          variant="h6"
+                          sx={{
+                            fontSize: "1.1rem",
+                            fontWeight: 600,
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            display: "-webkit-box",
+                            WebkitLineClamp: 2,
+                            WebkitBoxOrient: "vertical",
+                            lineHeight: 1.3,
+                            wordBreak: "break-word",
+                          }}
+                        >
+                          {res.title}
+                        </Typography>
+                      </Box>
+
+                      <Box
+                        sx={{
+                          height: "100px",
+                          overflow: "hidden",
+                          position: "relative",
+                          mb: 1,
+                        }}
+                      >
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            color: "#cccccc",
+                            lineHeight: 1.6,
+                            display: "-webkit-box",
+                            WebkitBoxOrient: "vertical",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            WebkitLineClamp: 4,
+                            maxHeight: "6.4em",
+                          }}
+                        >
+                          {res.description}
+                        </Typography>
+
+                        <Box
+                          sx={{
+                            position: "absolute",
+                            bottom: 0,
+                            left: 0,
+                            right: 0,
+                            height: "2em",
+                            background:
+                              "linear-gradient(to bottom, transparent, #1e1e1e)",
+                            pointerEvents: "none",
+                          }}
+                        />
+                      </Box>
+                    </CardContent>
+
+                    <CardActions>
+                      <Button
+                        size="small"
+                        onClick={() => window.open(res.url, "_blank")}
+                        sx={{ color: "#00ADB5" }}
+                      >
+                        {res.type === "PDF" ? "Download" : "Open"}
+                      </Button>
+                    </CardActions>
+                  </Card>
+                </Box>
               </Grid>
             ))}
           </Grid>

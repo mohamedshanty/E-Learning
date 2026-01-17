@@ -8,8 +8,29 @@ import {
   IconButton,
 } from "@mui/material";
 import { Facebook, Twitter, LinkedIn, YouTube } from "@mui/icons-material";
+import { useLocation, useNavigate } from "react-router-dom";
+
+const navigationItems = [
+  { id: "home", label: "Home" },
+  { id: "about", label: "About" },
+  { id: "my-courses", label: "My Courses" },
+  { id: "blog", label: "Blog" },
+  { id: "resources", label: "Resources" },
+  { id: "contact-us", label: "Contact Us" },
+];
 
 const Footer = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const handleNavClick = (sectionId) => {
+    if (location.pathname !== "/home") {
+      navigate(`/home#${sectionId}`);
+    } else {
+      const section = document.getElementById(sectionId);
+      section?.scrollIntoView({ behavior: "smooth" });
+    }
+  };
   return (
     <Box sx={{ backgroundColor: "#1e1e1e", color: "#cccccc", py: 6 }}>
       <Container maxWidth="lg">
@@ -34,22 +55,24 @@ const Footer = () => {
               Quick Links
             </Typography>
             <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-              {["Home", "About", "My Courses", "Blog", "Contact"].map(
-                (text) => (
-                  <Link
-                    key={text}
-                    href={`/${text.toLowerCase().replace(" ", "")}`}
-                    underline="none"
-                    sx={{
-                      color: "#cccccc",
-                      "&:hover": { color: "#00ADB5" },
-                      transition: "0.3s",
-                    }}
-                  >
-                    {text}
-                  </Link>
-                )
-              )}
+              {navigationItems.map((item) => (
+                <Link
+                  component="button"
+                  onClick={() => handleNavClick(item.id)}
+                  underline="none"
+                  sx={{
+                    color: "#cccccc",
+                    "&:hover": { color: "#00ADB5" },
+                    transition: "0.3s",
+                    cursor: "pointer",
+                    background: "none",
+                    border: "none",
+                    textAlign: "left",
+                  }}
+                >
+                  {item.label}
+                </Link>
+              ))}
             </Box>
           </Grid>
 

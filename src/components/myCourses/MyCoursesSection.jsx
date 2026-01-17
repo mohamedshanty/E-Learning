@@ -45,6 +45,7 @@ import {
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import { motion, AnimatePresence } from "framer-motion";
+import EmptyState from "../EmptyState/EmptyState";
 
 // Framer Motion components
 const MotionCard = motion(Card);
@@ -74,11 +75,52 @@ const theme = createTheme({
 });
 
 const topicsByYear = {
-  1: ["HTML", "CSS", "JavaScript", "Git and GitHub"],
-  2: ["React", "Redux", "TypeScript"],
-  3: ["Node.js", "Express", "MongoDB"],
-  4: ["Advanced JS", "Testing", "Performance"],
-  5: ["Project", "Deployment", "CI/CD"],
+  1: [
+    "Introduction to Computing",
+    "Calculus I",
+    "Principles of Management",
+    "Electrical Circuits",
+    "Electronics",
+    "Computer Programming II (Java)",
+    "Calculus II",
+    "Technical Writing Skills",
+    "Introduction to Engineering",
+  ],
+
+  2: [
+    "Introduction to Software Engineering",
+    "Data Structures",
+    "Discrete Mathematics",
+    "Global Network Technology",
+    "Computer Programming II",
+    "Digital Logic Design",
+    "Computer Organization and Assembly Language",
+    "Software Requirements Engineering",
+    "Advanced Programming (Python)",
+    "Algorithms",
+    "Principles of Statistics",
+    "Linear Algebra",
+    "Systems Analysis",
+  ],
+
+  3: [
+    "Operating Systems",
+    "Automata Theory",
+    "Computer Networks",
+    "Web Application Development",
+    "Web Page Design",
+    "Computer Graphics",
+    "Database Systems",
+    "Linear Algebra",
+  ],
+
+  4: [
+    "Information Security",
+    "Artificial Intelligence",
+    "Software Project Management",
+    "Advanced Software Design",
+    "Human-Computer Interaction",
+  ],
 };
 
 const MyCoursesSection = () => {
@@ -357,7 +399,7 @@ const MyCoursesSection = () => {
           ) : filteredCourses.length > 0 ? (
             <Grid container spacing={4}>
               <AnimatePresence>
-                {filteredCourses.map((course) => (
+                {filteredCourses.slice(0, 6).map((course) => (
                   <MotionGrid
                     size={{ xs: 12, sm: 6, md: 4 }}
                     key={course.id}
@@ -492,33 +534,27 @@ const MyCoursesSection = () => {
               </AnimatePresence>
             </Grid>
           ) : (
-            <MotionBox
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.3 }}
-              sx={{
-                textAlign: "center",
-                mt: 10,
-                p: 4,
-                backgroundColor: "background.paper",
-                borderRadius: 2,
-              }}
-            >
-              <Typography variant="h6" color="text.primary" sx={{ mb: 2 }}>
-                {userProfile?.topics?.length > 0
+            <EmptyState
+              type="profile"
+              title={
+                userProfile?.topics?.length > 0
                   ? "No courses available for your selected topics yet"
-                  : "You haven't selected any topics in your profile"}
-              </Typography>
-              <MotionButton
-                to="/complete-profile"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                {userProfile?.topics?.length > 0
+                  : "You haven't selected any topics in your profile"
+              }
+              description={
+                userProfile?.topics?.length > 0
+                  ? "Courses will appear here once they are added."
+                  : "Complete your profile to start getting courses."
+              }
+              actionLabel={
+                userProfile?.topics?.length > 0
                   ? "Browse All Courses"
-                  : "Complete Your Profile"}
-              </MotionButton>
-            </MotionBox>
+                  : "Complete Your Profile"
+              }
+              actionTo={
+                userProfile?.topics?.length > 0 ? "/courses" : "/profile"
+              }
+            />
           )}
 
           <Box
@@ -561,7 +597,7 @@ const MyCoursesSection = () => {
 
             <DialogContent>
               <Typography variant="body1" sx={{ mb: 2 }}>
-                Your academic year: <strong>Year {userProfile?.year}</strong>
+                Academic Year: <strong>Year {userProfile?.year}</strong>
               </Typography>
 
               <Autocomplete
@@ -581,13 +617,18 @@ const MyCoursesSection = () => {
                       animate={{ scale: 1 }}
                     >
                       <Chip
-                        variant="outlined"
                         label={option}
                         {...getTagProps({ index })}
+                        key={option}
                         sx={{
-                          backgroundColor: "transparent",
-                          color: "text.primary",
-                          borderColor: "primary.main",
+                          backgroundColor: "#393E46",
+                          color: "#EEEEEE",
+                          "& .MuiChip-deleteIcon": {
+                            color: "#AAAAAA",
+                            "&:hover": {
+                              color: "#EEEEEE",
+                            },
+                          },
                         }}
                       />
                     </motion.div>

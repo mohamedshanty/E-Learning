@@ -14,19 +14,23 @@ const Home = () => {
   const location = useLocation();
 
   useEffect(() => {
-    const hash = location.hash;
-    if (hash) {
-      const section = document.querySelector(hash);
-      if (section) {
-        setTimeout(() => {
-          section.scrollIntoView({ behavior: "smooth" });
-        }, 100);
-      }
+    if (!location.hash) return;
+
+    const id = location.hash.substring(1);
+    const section = document.getElementById(id);
+
+    if (section) {
+      requestAnimationFrame(() => {
+        section.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      });
     }
   }, [location]);
 
   return (
-    <Box component={"main"} id="home">
+    <Box component={"main"}>
       <Header />
       <Box component={"section"} id="home">
         <Hero />
@@ -40,7 +44,7 @@ const Home = () => {
       <Box component={"section"} id="blog">
         <BlogSection />
       </Box>
-      <Box component={"section"} id="resouces">
+      <Box component={"section"} id="resources">
         <ResourcesSection />
       </Box>
       <Box component={"section"} id="contact-us">

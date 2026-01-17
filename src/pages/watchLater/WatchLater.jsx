@@ -15,6 +15,7 @@ import {
 import CustomButton from "../../components/CustomButton/CustomButton";
 import ReactPlayer from "react-player";
 import { useNavigate } from "react-router-dom";
+import VideoLibraryOutlinedIcon from "@mui/icons-material/VideoLibraryOutlined";
 
 const WatchLater = () => {
   const { watchLaterVideos, removeFromWatchLater } =
@@ -38,19 +39,52 @@ const WatchLater = () => {
           {watchLaterVideos.length === 0 ? (
             <Box
               sx={{
-                textAlign: "center",
-                mt: 10,
-                p: 4,
-                backgroundColor: "background.paper",
-                borderRadius: 2,
+                minHeight: "60vh",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
               }}
             >
-              <Typography variant="h6" color="text.primary" sx={{ mb: 2 }}>
-                Your watch later list is empty
-              </Typography>
-              <CustomButton to="/courses" variant="contained">
-                Browse Courses
-              </CustomButton>
+              <Box
+                sx={{
+                  textAlign: "center",
+                  p: { xs: 4, md: 6 },
+                  // maxWidth: 500,
+                  width: "100%",
+                  background: "rgba(255,255,255,0.05)",
+                  backdropFilter: "blur(8px)",
+                  borderRadius: 4,
+                  boxShadow: "0 10px 30px rgba(0,0,0,0.3)",
+                }}
+              >
+                <VideoLibraryOutlinedIcon
+                  sx={{ fontSize: 70, color: "#00ADB5", mb: 2 }}
+                />
+
+                <Typography
+                  variant="h5"
+                  sx={{ color: "#fff", fontWeight: 600, mb: 1 }}
+                >
+                  No videos saved yet
+                </Typography>
+
+                <Typography variant="body2" sx={{ color: "#bbb", mb: 3 }}>
+                  Save videos to your Watch Later list and come back anytime to
+                  continue learning.
+                </Typography>
+
+                <CustomButton
+                  to="/courses"
+                  variant="contained"
+                  sx={{
+                    px: 4,
+                    py: 1.2,
+                    fontWeight: 600,
+                  }}
+                >
+                  Browse Courses
+                </CustomButton>
+              </Box>
             </Box>
           ) : (
             <Grid container spacing={3} sx={{ height: "100%" }}>

@@ -41,11 +41,52 @@ import { CloudUpload, Edit, Delete } from "@mui/icons-material";
 import CustomTextField from "../customTextField/CustomTextField";
 
 const topicsByYear = {
-  1: ["HTML", "CSS", "JavaScript", "Git and Github"],
-  2: ["React", "Redux", "TypeScript"],
-  3: ["Node.js", "Express", "MongoDB"],
-  4: ["Advanced JS", "Testing", "Performance"],
-  5: ["Project", "Deployment", "CI/CD"],
+  1: [
+    "Introduction to Computing",
+    "Calculus I",
+    "Principles of Management",
+    "Electrical Circuits",
+    "Electronics",
+    "Computer Programming II (Java)",
+    "Calculus II",
+    "Technical Writing Skills",
+    "Introduction to Engineering",
+  ],
+
+  2: [
+    "Introduction to Software Engineering",
+    "Data Structures",
+    "Discrete Mathematics",
+    "Global Network Technology",
+    "Computer Programming II",
+    "Digital Logic Design",
+    "Computer Organization and Assembly Language",
+    "Software Requirements Engineering",
+    "Advanced Programming (Python)",
+    "Algorithms",
+    "Principles of Statistics",
+    "Linear Algebra",
+    "Systems Analysis",
+  ],
+
+  3: [
+    "Operating Systems",
+    "Automata Theory",
+    "Computer Networks",
+    "Web Application Development",
+    "Web Page Design",
+    "Computer Graphics",
+    "Database Systems",
+    "Linear Algebra",
+  ],
+
+  4: [
+    "Information Security",
+    "Artificial Intelligence",
+    "Software Project Management",
+    "Advanced Software Design",
+    "Human-Computer Interaction",
+  ],
 };
 
 const AdminCourses = () => {
@@ -427,9 +468,6 @@ const AdminCourses = () => {
                 </MenuItem>
                 <MenuItem value="4" sx={{ color: "#000" }}>
                   Fourth Year
-                </MenuItem>
-                <MenuItem value="5" sx={{ color: "#000" }}>
-                  Fifth Year
                 </MenuItem>
               </Select>
             </FormControl>

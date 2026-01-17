@@ -28,11 +28,52 @@ import CustomTextField from "../../components/customTextField/CustomTextField";
 import { uploadImageToCloudinary } from "../../utils/uploadImageToCloudinary";
 
 const topicsByYear = {
-  1: ["HTML", "CSS", "JavaScript", "Git and GitHub"],
-  2: ["React", "Redux", "TypeScript"],
-  3: ["Node.js", "Express", "MongoDB"],
-  4: ["Advanced JS", "Testing", "Performance"],
-  5: ["Project", "Deployment", "CI/CD"],
+  1: [
+    "Introduction to Computing",
+    "Calculus I",
+    "Principles of Management",
+    "Electrical Circuits",
+    "Electronics",
+    "Computer Programming II (Java)",
+    "Calculus II",
+    "Technical Writing Skills",
+    "Introduction to Engineering",
+  ],
+
+  2: [
+    "Introduction to Software Engineering",
+    "Data Structures",
+    "Discrete Mathematics",
+    "Global Network Technology",
+    "Computer Programming II",
+    "Digital Logic Design",
+    "Computer Organization and Assembly Language",
+    "Software Requirements Engineering",
+    "Advanced Programming (Python)",
+    "Algorithms",
+    "Principles of Statistics",
+    "Linear Algebra",
+    "Systems Analysis",
+  ],
+
+  3: [
+    "Operating Systems",
+    "Automata Theory",
+    "Computer Networks",
+    "Web Application Development",
+    "Web Page Design",
+    "Computer Graphics",
+    "Database Systems",
+    "Linear Algebra",
+  ],
+
+  4: [
+    "Information Security",
+    "Artificial Intelligence",
+    "Software Project Management",
+    "Advanced Software Design",
+    "Human-Computer Interaction",
+  ],
 };
 
 const EditProfile = () => {
@@ -85,9 +126,10 @@ const EditProfile = () => {
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
+
     setProfileData((prev) => ({
       ...prev,
-      [name]: files ? files[0] : value,
+      [name]: name === "year" ? Number(value) : files ? files[0] : value,
     }));
 
     if (name === "year") setSelectedTopics([]);
@@ -96,8 +138,9 @@ const EditProfile = () => {
   const handleSave = async (e) => {
     e.preventDefault();
     const uid = localStorage.getItem("uid");
+
     if (!uid || !profileData.year || selectedTopics.length === 0) {
-      toast.error("Please fill all fields");
+      toast.error("Please fill all fields and select at least one topic");
       return;
     }
 
@@ -124,28 +167,44 @@ const EditProfile = () => {
         updatedAt: Date.now(),
       });
 
-      await updateDoc(doc(db, "users", uid), {
-        avatar: imageUrl,
-      });
+      if (imageUrl) {
+        await updateDoc(doc(db, "users", uid), {
+          avatar: imageUrl,
+        });
+      }
 
       const coursesSnapshot = await getDocs(collection(db, "courses"));
-      const matchedCourses = coursesSnapshot.docs
-        .map((doc) => ({ id: doc.id, ...doc.data() }))
-        .filter(
-          (course) =>
-            course.year === profileData.year &&
-            course.topics?.some((topic) => selectedTopics.includes(topic))
-        )
-        .map((course) => course.id);
+      const allCourses = coursesSnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+
+      const matchedCourses = allCourses.filter(
+        (course) =>
+          Number(course.year) === Number(profileData.year) &&
+          course.topics?.some((topic) => selectedTopics.includes(topic))
+      );
+
+      console.log(
+        `Found ${matchedCourses.length} courses matching new criteria`
+      );
+      console.log("Year:", profileData.year);
+      console.log("Topics:", selectedTopics);
+      console.log(
+        "Matched courses:",
+        matchedCourses.map((c) => ({ id: c.id, title: c.title }))
+      );
 
       await updateDoc(doc(db, "users", uid), {
-        enrolledCourses: matchedCourses,
+        enrolledCourses: matchedCourses.map((course) => course.id),
       });
 
-      toast.success("Profile updated successfully");
+      toast.success(
+        `Profile updated successfully! Enrolled in ${matchedCourses.length} courses`
+      );
       navigate("/home");
     } catch (error) {
-      console.error(error);
+      console.error("Error updating profile:", error);
       toast.error("Failed to update profile");
     } finally {
       setLoading(false);
@@ -230,22 +289,42 @@ const EditProfile = () => {
               required
             />
 
-            <FormControl fullWidth>
-              <InputLabel id="year-label">Academic Year</InputLabel>
+            <FormControl fullWidth margin="normal" sx={{ color: "#EEEEEE" }}>
+              <InputLabel id="year-label" sx={{ color: "#AAAAAA" }}>
+                Academic Year *
+              </InputLabel>
               <Select
                 labelId="year-label"
                 name="year"
                 value={profileData.year}
                 onChange={handleChange}
                 required
-                label="Academic Year"
-                sx={{ color: "#eee" }}
+                label="Academic Year *"
+                sx={{
+                  color: "#EEEEEE",
+                  "& .MuiOutlinedInput-notchedOutline": {
+                    borderColor: "#333",
+                  },
+                  "&:hover .MuiOutlinedInput-notchedOutline": {
+                    borderColor: "#00ADB5",
+                  },
+                  "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                    borderColor: "#00ADB5",
+                  },
+                }}
               >
-                <MenuItem value="1">First Year</MenuItem>
-                <MenuItem value="2">Second Year</MenuItem>
-                <MenuItem value="3">Third Year</MenuItem>
-                <MenuItem value="4">Fourth Year</MenuItem>
-                <MenuItem value="5">Fifth Year</MenuItem>
+                <MenuItem value="1" sx={{ color: "#000" }}>
+                  First Year
+                </MenuItem>
+                <MenuItem value="2" sx={{ color: "#000" }}>
+                  Second Year
+                </MenuItem>
+                <MenuItem value="3" sx={{ color: "#000" }}>
+                  Third Year
+                </MenuItem>
+                <MenuItem value="4" sx={{ color: "#000" }}>
+                  Fourth Year
+                </MenuItem>
               </Select>
             </FormControl>
 
@@ -262,9 +341,14 @@ const EditProfile = () => {
                       {...getTagProps({ index })}
                       key={option}
                       sx={{
-                        backgroundColor: "#222",
-                        color: "#fff",
-                        borderColor: "#00ADB5",
+                        backgroundColor: "#393E46",
+                        color: "#EEEEEE",
+                        "& .MuiChip-deleteIcon": {
+                          color: "#AAAAAA",
+                          "&:hover": {
+                            color: "#EEEEEE",
+                          },
+                        },
                       }}
                     />
                   ))

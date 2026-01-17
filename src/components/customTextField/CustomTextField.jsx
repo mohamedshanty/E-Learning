@@ -3,21 +3,21 @@ import { styled } from "@mui/system";
 
 const CustomTextField = styled(TextField)(() => ({
   "& label": {
-    color: "#bbb",
+    color: "#AAAAAA",
   },
   "& label.Mui-focused": {
-    color: "#ccc",
+    color: "#AAAAAA",
   },
   "& .MuiOutlinedInput-root": {
-    color: "#fff",
+    color: "#EEEEEE",
     "& fieldset": {
-      borderColor: "#555",
+      borderColor: "#333",
     },
     "&:hover fieldset": {
-      borderColor: "#888",
+      borderColor: "#00ADB5",
     },
     "&.Mui-focused fieldset": {
-      borderColor: "#2c5364",
+      borderColor: "#00ADB5",
     },
   },
 }));

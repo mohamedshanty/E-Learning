@@ -198,7 +198,7 @@ const Header = () => {
                   )}
 
                   <IconButton
-                    color="inherit"
+                    style={{ color: "white" }}
                     onClick={() => navigate("/watch-later")}
                   >
                     <VideoLibrary />

@@ -28,6 +28,10 @@ import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 import { db } from "../../config/firebase";
 import { doc, getDoc } from "firebase/firestore";
 import CustomTextField from "../../components/customTextField/CustomTextField";
+import SchoolOutlinedIcon from "@mui/icons-material/SchoolOutlined";
+import SearchOffOutlinedIcon from "@mui/icons-material/SearchOffOutlined";
+import TuneOutlinedIcon from "@mui/icons-material/TuneOutlined";
+import EmptyState from "../../components/EmptyState/EmptyState";
 
 const theme = createTheme({
   palette: {
@@ -410,28 +414,44 @@ const Courses = () => {
               ))}
             </Grid>
           ) : (
-            <Box
-              sx={{
-                textAlign: "center",
-                mt: 10,
-                p: 4,
-                backgroundColor: "background.paper",
-                borderRadius: 2,
-              }}
-            >
-              <Typography variant="h6" color="text.primary" sx={{ mb: 2 }}>
-                {searchQuery
-                  ? "No courses match your search"
+            <EmptyState
+              type={
+                searchQuery
+                  ? "search"
                   : userData?.enrolledCourses?.length > 0
-                    ? "No enrolled courses match your filters"
-                    : "No available courses match your profile"}
-              </Typography>
-              <CustomButton to="/home" variant="contained">
-                {userData?.enrolledCourses?.length > 0
-                  ? "Browse Available Courses"
-                  : "Complete Your Profile"}
-              </CustomButton>
-            </Box>
+                    ? "filters"
+                    : "profile"
+              }
+              title={
+                searchQuery
+                  ? "No results found"
+                  : userData?.enrolledCourses?.length > 0
+                    ? "No courses match your filters"
+                    : "No courses available for you"
+              }
+              description={
+                searchQuery
+                  ? "Try changing the search keywords or removing filters."
+                  : userData?.enrolledCourses?.length > 0
+                    ? "Adjust your filters to see your enrolled courses."
+                    : "Complete your profile to get courses tailored to your academic year and interests."
+              }
+              actionLabel={
+                searchQuery
+                  ? "Clear Search"
+                  : userData?.enrolledCourses?.length > 0
+                    ? "Browse Courses"
+                    : "Complete Profile"
+              }
+              onAction={searchQuery ? () => setSearchQuery("") : null}
+              actionTo={
+                !searchQuery
+                  ? userData?.enrolledCourses?.length > 0
+                    ? "/courses"
+                    : "/profile"
+                  : null
+              }
+            />
           )}
         </Container>
       </Box>

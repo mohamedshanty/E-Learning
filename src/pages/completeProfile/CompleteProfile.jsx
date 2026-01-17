@@ -26,6 +26,7 @@ import {
   updateDoc,
   collection,
   getDocs,
+  getDoc,
 } from "firebase/firestore";
 import toast from "react-hot-toast";
 
@@ -49,11 +50,52 @@ const theme = createTheme({
 });
 
 const topicsByYear = {
-  1: ["HTML", "CSS", "JavaScript", "Git and GitHub"],
-  2: ["React", "Redux", "TypeScript"],
-  3: ["Node.js", "Express", "MongoDB"],
-  4: ["Advanced JS", "Testing", "Performance"],
-  5: ["Project", "Deployment", "CI/CD"],
+  1: [
+    "Introduction to Computing",
+    "Calculus I",
+    "Principles of Management",
+    "Electrical Circuits",
+    "Electronics",
+    "Computer Programming II (Java)",
+    "Calculus II",
+    "Technical Writing Skills",
+    "Introduction to Engineering",
+  ],
+
+  2: [
+    "Introduction to Software Engineering",
+    "Data Structures",
+    "Discrete Mathematics",
+    "Global Network Technology",
+    "Computer Programming II",
+    "Digital Logic Design",
+    "Computer Organization and Assembly Language",
+    "Software Requirements Engineering",
+    "Advanced Programming (Python)",
+    "Algorithms",
+    "Principles of Statistics",
+    "Linear Algebra",
+    "Systems Analysis",
+  ],
+
+  3: [
+    "Operating Systems",
+    "Automata Theory",
+    "Computer Networks",
+    "Web Application Development",
+    "Web Page Design",
+    "Computer Graphics",
+    "Database Systems",
+    "Linear Algebra",
+  ],
+
+  4: [
+    "Information Security",
+    "Artificial Intelligence",
+    "Software Project Management",
+    "Advanced Software Design",
+    "Human-Computer Interaction",
+  ],
 };
 
 const CompleteProfile = () => {
@@ -66,11 +108,48 @@ const CompleteProfile = () => {
   const [selectedOptions, setSelectedOptions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [preview, setPreview] = useState(null);
+  const [isLoadingData, setIsLoadingData] = useState(true);
   const navigate = useNavigate();
+
+  // جلب بيانات المستخدم الحالية عند تحميل الصفحة
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const userId = localStorage.getItem("uid");
+        if (!userId) {
+          toast.error("User ID not found. Please log in again.");
+          setIsLoadingData(false);
+          return;
+        }
+
+        const profileDoc = await getDoc(doc(db, "profiles", userId));
+
+        if (profileDoc.exists()) {
+          const userData = profileDoc.data();
+
+          // تعبئة البيانات الحالية
+          setProfileForm({
+            phone: userData.phone || "",
+            image: null,
+            year: userData.year || "",
+          });
+
+          setSelectedOptions(userData.topics || []);
+          setPreview(userData.imageUrl || assets.avatar_icon);
+        }
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+        toast.error("Failed to load user data");
+      } finally {
+        setIsLoadingData(false);
+      }
+    };
+
+    fetchUserData();
+  }, []);
 
   useEffect(() => {
     if (!profileForm.image) {
-      setPreview(null);
       return;
     }
     const objectUrl = URL.createObjectURL(profileForm.image);
@@ -115,6 +194,9 @@ const CompleteProfile = () => {
             error: "Failed to upload image",
           }
         );
+      } else if (preview && preview !== assets.avatar_icon) {
+        // إذا كانت هناك صورة موجودة مسبقاً ولم يتم تغييرها
+        imageUrl = preview;
       }
 
       await setDoc(doc(db, "profiles", userId), {
@@ -152,7 +234,7 @@ const CompleteProfile = () => {
 
       if (matchingCourses.length > 0) {
         toast.success(
-          `You have been enrolled in ${matchingCourses.length} courses!`
+          `Profile updated! Enrolled in ${matchingCourses.length} courses!`
         );
       } else {
         toast.success("Profile saved successfully! No matching courses found.");
@@ -178,6 +260,24 @@ const CompleteProfile = () => {
       setSelectedOptions([]);
     }
   };
+
+  if (isLoadingData) {
+    return (
+      <ThemeProvider theme={theme}>
+        <Box
+          sx={{
+            minHeight: "100vh",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            background: "linear-gradient(to bottom, #0A0A0A, #101624)",
+          }}
+        >
+          <CircularProgress sx={{ color: "#00ADB5" }} />
+        </Box>
+      </ThemeProvider>
+    );
+  }
 
   return (
     <ThemeProvider theme={theme}>
@@ -206,7 +306,9 @@ const CompleteProfile = () => {
               gutterBottom
               sx={{ color: "primary.main" }}
             >
-              Complete Your Profile
+              {preview === assets.avatar_icon
+                ? "Complete Your Profile"
+                : "Update Your Profile"}
             </Typography>
 
             <Box
@@ -220,7 +322,14 @@ const CompleteProfile = () => {
               }}
             >
               <label htmlFor="avatar">
-                <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 2,
+                    cursor: "pointer",
+                  }}
+                >
                   <input
                     type="file"
                     name="image"
@@ -229,16 +338,23 @@ const CompleteProfile = () => {
                     id="avatar"
                     hidden
                   />
+
                   <img
                     style={{
-                      maxWidth: "90px",
-                      aspectRatio: "1/1",
+                      width: 80,
+                      height: 80,
                       borderRadius: "50%",
+                      objectFit: "cover",
                     }}
                     src={preview || assets.avatar_icon}
                     alt="avatar"
+                    onClick={() => document.getElementById("avatar").click()}
                   />
-                  <Typography variant="body1">Upload Profile Image</Typography>
+                  <Typography variant="body1">
+                    {preview === assets.avatar_icon
+                      ? "Upload Profile Image"
+                      : "Change Profile Image"}
+                  </Typography>
                 </Box>
               </label>
 
@@ -251,30 +367,34 @@ const CompleteProfile = () => {
                 required
               />
 
-              <FormControl fullWidth>
-                <InputLabel id="year-label">Academic Year</InputLabel>
+              <FormControl fullWidth margin="normal" sx={{ color: "#EEEEEE" }}>
+                <InputLabel id="year-label" sx={{ color: "#AAAAAA" }}>
+                  Academic Year *
+                </InputLabel>
                 <Select
                   labelId="year-label"
                   name="year"
                   value={profileForm.year}
                   onChange={handleChange}
                   required
-                  label="Academic Year"
+                  label="Academic Year *"
                   sx={{
-                    color: "text.primary",
+                    color: "#EEEEEE",
                     "& .MuiOutlinedInput-notchedOutline": {
-                      borderColor: "secondary.main",
+                      borderColor: "#333",
+                    },
+                    "&:hover .MuiOutlinedInput-notchedOutline": {
+                      borderColor: "#00ADB5",
+                    },
+                    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                      borderColor: "#00ADB5",
                     },
                   }}
                 >
-                  <MenuItem value="">
-                    <em>None</em>
-                  </MenuItem>
                   <MenuItem value="1">First Year</MenuItem>
                   <MenuItem value="2">Second Year</MenuItem>
                   <MenuItem value="3">Third Year</MenuItem>
                   <MenuItem value="4">Fourth Year</MenuItem>
-                  <MenuItem value="5">Fifth Year</MenuItem>
                 </Select>
               </FormControl>
 
@@ -289,14 +409,18 @@ const CompleteProfile = () => {
                   renderTags={(value, getTagProps) =>
                     value.map((option, index) => (
                       <Chip
-                        variant="outlined"
                         label={option}
                         {...getTagProps({ index })}
                         key={option}
                         sx={{
-                          backgroundColor: "transparent",
-                          color: "text.primary",
-                          borderColor: "primary.main",
+                          backgroundColor: "#393E46",
+                          color: "#EEEEEE",
+                          "& .MuiChip-deleteIcon": {
+                            color: "#AAAAAA",
+                            "&:hover": {
+                              color: "#EEEEEE",
+                            },
+                          },
                         }}
                       />
                     ))
@@ -306,9 +430,39 @@ const CompleteProfile = () => {
                       {...params}
                       label="Select Topics"
                       placeholder="Start typing..."
+                      margin="normal"
+                      fullWidth
                     />
                   )}
-                  sx={{ width: "100%" }}
+                  sx={{
+                    width: "100%",
+                    "& .MuiAutocomplete-listbox": {
+                      backgroundColor: "#ffffff",
+                      color: "#000000",
+                      "& .MuiAutocomplete-option": {
+                        "&:hover": {
+                          backgroundColor: "#f0f0f0",
+                        },
+                        "&.Mui-focused": {
+                          backgroundColor: "#e0e0e0",
+                        },
+                      },
+                    },
+                  }}
+                  renderOption={(props, option) => (
+                    <li
+                      {...props}
+                      style={{ backgroundColor: "#ffffff", color: "#444444" }}
+                    >
+                      {option}
+                    </li>
+                  )}
+                  ListboxProps={{
+                    style: {
+                      maxHeight: "200px",
+                      backgroundColor: "#ffffff",
+                    },
+                  }}
                 />
               )}
 
